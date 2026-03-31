@@ -1,0 +1,40 @@
+package com.spotline.api.controller;
+
+import com.spotline.api.dto.request.CreateRouteRequest;
+import com.spotline.api.dto.response.RouteDetailResponse;
+import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.service.RouteService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/api/v2/routes")
+@RequiredArgsConstructor
+public class RouteController {
+
+    private final RouteService routeService;
+
+    @GetMapping("/{slug}")
+    public ResponseEntity<RouteDetailResponse> getBySlug(@PathVariable String slug) {
+        return ResponseEntity.ok(routeService.getDetailBySlug(slug));
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<Page<RoutePreviewResponse>> popular(
+            @RequestParam(required = false) String area,
+            @RequestParam(required = false) String theme,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, pageable));
+    }
+
+    @PostMapping
+    public ResponseEntity<RouteDetailResponse> create(@Valid @RequestBody CreateRouteRequest request) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(routeService.createAndReturn(request));
+    }
+}
