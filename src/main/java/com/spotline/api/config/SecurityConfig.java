@@ -1,5 +1,6 @@
 package com.spotline.api.config;
 
+import com.spotline.api.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -8,6 +9,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -15,6 +17,7 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
 
     private final CorsConfig corsConfig;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -24,18 +27,24 @@ public class SecurityConfig {
                 .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                        // Public — 읽기 전용
                         .requestMatchers(HttpMethod.GET, "/api/v2/spots/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/routes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/places/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v2/users/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
-                        // Admin endpoints (향후 Supabase JWT 검증 추가)
-                        .requestMatchers("/api/v2/admin/**").authenticated()
-                        // 나머지는 허용 (개발 단계)
+                        // 인증 필요 — 쓰기 작업
+                        .requestMatchers(HttpMethod.POST, "/api/v2/**").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/v2/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/v2/**").authenticated()
+                        .requestMatchers(HttpMethod.PATCH, "/api/v2/**").authenticated()
+                        // 나머지 GET은 허용
                         .anyRequest().permitAll()
-                );
+                )
+                .addFilterBefore(jwtAuthenticationFilter,
+                    UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
