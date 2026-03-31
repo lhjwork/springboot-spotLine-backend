@@ -34,4 +34,7 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
     boolean existsBySlug(String slug);
 
     Optional<Spot> findByQrIdAndIsActiveTrue(String qrId);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true ORDER BY s.updatedAt DESC")
+    List<Spot> findAllActiveSlugs();
 }

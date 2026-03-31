@@ -3,9 +3,12 @@ package com.spotline.api.controller;
 import com.spotline.api.dto.request.CreateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.service.RouteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -31,6 +34,11 @@ public class RouteController {
             @RequestParam(required = false) String theme,
             @PageableDefault(size = 20) Pageable pageable) {
         return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, pageable));
+    }
+
+    @GetMapping("/slugs")
+    public ResponseEntity<List<SlugResponse>> slugs() {
+        return ResponseEntity.ok(routeService.getAllSlugs());
     }
 
     @PostMapping

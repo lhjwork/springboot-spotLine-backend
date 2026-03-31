@@ -11,6 +11,7 @@ import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.dto.response.DiscoverResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.infrastructure.place.PlaceApiService;
 import com.spotline.api.infrastructure.place.PlaceInfo;
@@ -434,6 +435,15 @@ public class SpotService {
 
     private String getS3BaseUrl() {
         return s3Service.getPublicUrl("").replaceAll("/$", "");
+    }
+
+    public List<SlugResponse> getAllSlugs() {
+        return spotRepository.findAllActiveSlugs().stream()
+                .map(s -> SlugResponse.builder()
+                        .slug(s.getSlug())
+                        .updatedAt(s.getUpdatedAt())
+                        .build())
+                .toList();
     }
 
     private String generateUniqueSlug(String title) {

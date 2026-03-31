@@ -3,6 +3,7 @@ package com.spotline.api.controller;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
 import com.spotline.api.dto.response.DiscoverResponse;
+import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.service.SpotService;
 import jakarta.validation.Valid;
@@ -74,6 +75,11 @@ public class SpotController {
     public ResponseEntity<Void> delete(@PathVariable String slug) {
         spotService.delete(slug);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/slugs")
+    public ResponseEntity<List<SlugResponse>> slugs() {
+        return ResponseEntity.ok(spotService.getAllSlugs());
     }
 
     @PostMapping("/bulk")

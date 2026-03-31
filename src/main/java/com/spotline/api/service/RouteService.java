@@ -8,6 +8,7 @@ import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
+import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -113,6 +115,15 @@ public class RouteService {
         route.setTotalDistance(totalDistance);
 
         return routeRepository.save(route);
+    }
+
+    public List<SlugResponse> getAllSlugs() {
+        return routeRepository.findAllActiveSlugs().stream()
+                .map(r -> SlugResponse.builder()
+                        .slug(r.getSlug())
+                        .updatedAt(r.getUpdatedAt())
+                        .build())
+                .toList();
     }
 
     private String generateUniqueSlug(String title) {
