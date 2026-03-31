@@ -13,6 +13,8 @@ import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -47,8 +49,8 @@ public class RouteService {
     }
 
     @Transactional
-    public RouteDetailResponse createAndReturn(CreateRouteRequest request) {
-        Route route = create(request);
+    public RouteDetailResponse createAndReturn(CreateRouteRequest request, String userId, String creatorType) {
+        Route route = create(request, userId, creatorType);
         return RouteDetailResponse.from(route);
     }
 
@@ -66,7 +68,7 @@ public class RouteService {
     }
 
     @Transactional
-    public Route create(CreateRouteRequest request) {
+    public Route create(CreateRouteRequest request, String userId, String creatorType) {
         String slug = generateUniqueSlug(request.getTitle());
 
         Route route = Route.builder()
@@ -75,7 +77,8 @@ public class RouteService {
                 .description(request.getDescription())
                 .theme(request.getTheme())
                 .area(request.getArea())
-                .creatorType("crew")
+                .creatorType(creatorType)
+                .creatorId(userId)
                 .creatorName(request.getCreatorName())
                 .build();
 
@@ -119,8 +122,9 @@ public class RouteService {
     }
 
     @Transactional
-    public RouteDetailResponse update(String slug, UpdateRouteRequest request) {
+    public RouteDetailResponse update(String slug, UpdateRouteRequest request, String userId) {
         Route route = getBySlug(slug);
+        verifyOwnership(route.getCreatorId(), userId);
 
         if (request.getTitle() != null) route.setTitle(request.getTitle());
         if (request.getDescription() != null) route.setDescription(request.getDescription());
@@ -161,10 +165,17 @@ public class RouteService {
     }
 
     @Transactional
-    public void delete(String slug) {
+    public void delete(String slug, String userId) {
         Route route = getBySlug(slug);
+        verifyOwnership(route.getCreatorId(), userId);
         route.setIsActive(false);
         routeRepository.save(route);
+    }
+
+    private void verifyOwnership(String creatorId, String userId) {
+        if (creatorId != null && !creatorId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인의 콘텐츠만 수정/삭제할 수 있습니다");
+        }
     }
 
     public List<SlugResponse> getAllSlugs() {

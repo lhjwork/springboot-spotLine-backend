@@ -18,6 +18,8 @@ import com.spotline.api.infrastructure.place.PlaceInfo;
 import com.spotline.api.infrastructure.s3.S3Service;
 import com.spotline.api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -91,7 +93,7 @@ public class SpotService {
      * Spot 생성
      */
     @Transactional
-    public SpotDetailResponse create(CreateSpotRequest request) {
+    public SpotDetailResponse create(CreateSpotRequest request, String userId, String creatorType) {
         String slug = generateUniqueSlug(request.getTitle());
 
         Spot spot = Spot.builder()
@@ -115,7 +117,8 @@ public class SpotService {
                 .kakaoPlaceId(request.getKakaoPlaceId())
                 .tags(request.getTags() != null ? request.getTags() : new ArrayList<>())
                 .media(request.getMedia() != null ? request.getMedia() : new ArrayList<>())
-                .creatorType("crew")
+                .creatorType(creatorType)
+                .creatorId(userId)
                 .creatorName(request.getCreatorName())
                 .build();
 
@@ -134,9 +137,10 @@ public class SpotService {
      * Spot 수정
      */
     @Transactional
-    public SpotDetailResponse update(String slug, UpdateSpotRequest request) {
+    public SpotDetailResponse update(String slug, UpdateSpotRequest request, String userId) {
         Spot spot = spotRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
+        verifyOwnership(spot.getCreatorId(), userId);
 
         if (request.getTitle() != null) spot.setTitle(request.getTitle());
         if (request.getDescription() != null) spot.setDescription(request.getDescription());
@@ -172,9 +176,10 @@ public class SpotService {
      * Spot 삭제 (soft delete)
      */
     @Transactional
-    public void delete(String slug) {
+    public void delete(String slug, String userId) {
         Spot spot = spotRepository.findBySlugAndIsActiveTrue(slug)
                 .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
+        verifyOwnership(spot.getCreatorId(), userId);
         spot.setIsActive(false);
         spotRepository.save(spot);
     }
@@ -185,8 +190,14 @@ public class SpotService {
     @Transactional
     public List<SpotDetailResponse> bulkCreate(List<CreateSpotRequest> requests) {
         return requests.stream()
-                .map(this::create)
+                .map(req -> create(req, null, "crew"))
                 .toList();
+    }
+
+    private void verifyOwnership(String creatorId, String userId) {
+        if (creatorId != null && !creatorId.equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "본인의 콘텐츠만 수정/삭제할 수 있습니다");
+        }
     }
 
     /**

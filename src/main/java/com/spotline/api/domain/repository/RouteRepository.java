@@ -24,6 +24,8 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
     Page<Route> findByAreaAndThemeAndIsActiveTrueOrderByLikesCountDesc(
             String area, RouteTheme theme, Pageable pageable);
 
+    Page<Route> findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(String creatorId, Pageable pageable);
+
     boolean existsBySlug(String slug);
 
     @Query("SELECT r FROM Route r WHERE r.isActive = true ORDER BY r.updatedAt DESC")

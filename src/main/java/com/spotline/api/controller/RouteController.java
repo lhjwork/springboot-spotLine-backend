@@ -5,6 +5,7 @@ import com.spotline.api.dto.request.UpdateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
+import com.spotline.api.security.AuthUtil;
 import com.spotline.api.service.RouteService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 public class RouteController {
 
     private final RouteService routeService;
+    private final AuthUtil authUtil;
 
     @GetMapping("/{slug}")
     public ResponseEntity<RouteDetailResponse> getBySlug(@PathVariable String slug) {
@@ -44,19 +46,21 @@ public class RouteController {
 
     @PostMapping
     public ResponseEntity<RouteDetailResponse> create(@Valid @RequestBody CreateRouteRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(routeService.createAndReturn(request));
+        String userId = authUtil.requireUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(routeService.createAndReturn(request, userId, "user"));
     }
 
     @PutMapping("/{slug}")
     public ResponseEntity<RouteDetailResponse> update(
             @PathVariable String slug,
             @Valid @RequestBody UpdateRouteRequest request) {
-        return ResponseEntity.ok(routeService.update(slug, request));
+        return ResponseEntity.ok(routeService.update(slug, request, authUtil.requireUserId()));
     }
 
     @DeleteMapping("/{slug}")
     public ResponseEntity<Void> delete(@PathVariable String slug) {
-        routeService.delete(slug);
+        routeService.delete(slug, authUtil.requireUserId());
         return ResponseEntity.noContent().build();
     }
 }

@@ -5,6 +5,7 @@ import com.spotline.api.dto.request.UpdateSpotRequest;
 import com.spotline.api.dto.response.DiscoverResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
+import com.spotline.api.security.AuthUtil;
 import com.spotline.api.service.SpotService;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
@@ -24,6 +25,7 @@ import java.util.List;
 public class SpotController {
 
     private final SpotService spotService;
+    private final AuthUtil authUtil;
 
     @GetMapping("/discover")
     public ResponseEntity<DiscoverResponse> discover(
@@ -61,19 +63,21 @@ public class SpotController {
 
     @PostMapping
     public ResponseEntity<SpotDetailResponse> create(@Valid @RequestBody CreateSpotRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(spotService.create(request));
+        String userId = authUtil.requireUserId();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(spotService.create(request, userId, "user"));
     }
 
     @PutMapping("/{slug}")
     public ResponseEntity<SpotDetailResponse> update(
             @PathVariable String slug,
             @Valid @RequestBody UpdateSpotRequest request) {
-        return ResponseEntity.ok(spotService.update(slug, request));
+        return ResponseEntity.ok(spotService.update(slug, request, authUtil.requireUserId()));
     }
 
     @DeleteMapping("/{slug}")
     public ResponseEntity<Void> delete(@PathVariable String slug) {
-        spotService.delete(slug);
+        spotService.delete(slug, authUtil.requireUserId());
         return ResponseEntity.noContent().build();
     }
 

@@ -31,6 +31,8 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
             @Param("minLat") double minLat, @Param("maxLat") double maxLat,
             @Param("minLng") double minLng, @Param("maxLng") double maxLng);
 
+    Page<Spot> findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(String creatorId, Pageable pageable);
+
     boolean existsBySlug(String slug);
 
     Optional<Spot> findByQrIdAndIsActiveTrue(String qrId);

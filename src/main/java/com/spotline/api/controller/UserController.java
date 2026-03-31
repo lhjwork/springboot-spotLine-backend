@@ -1,8 +1,12 @@
 package com.spotline.api.controller;
 
+import com.spotline.api.domain.entity.Spot;
+import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.entity.User;
+import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.RouteSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
+import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.domain.repository.SpotSaveRepository;
 import com.spotline.api.domain.repository.UserRepository;
 import com.spotline.api.dto.request.AvatarUploadRequest;
@@ -29,6 +33,8 @@ public class UserController {
     private final SpotLikeRepository spotLikeRepository;
     private final SpotSaveRepository spotSaveRepository;
     private final RouteSaveRepository routeSaveRepository;
+    private final SpotRepository spotRepository;
+    private final RouteRepository routeRepository;
     private final UserProfileService userProfileService;
 
     @PutMapping("/me/profile")
@@ -48,6 +54,32 @@ public class UserController {
     public UserProfileResponse deleteAvatar() {
         return userProfileService.deleteAvatar(
             authUtil.requireUserId(), authUtil.getCurrentEmail());
+    }
+
+    @GetMapping("/me/spots")
+    public SimplePageResponse<SpotDetailResponse> getMySpots(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        String userId = authUtil.requireUserId();
+        Page<Spot> spots = spotRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
+            userId, PageRequest.of(page, size));
+        return new SimplePageResponse<>(
+            spots.getContent().stream().map(s -> SpotDetailResponse.from(s, null)).toList(),
+            spots.hasNext()
+        );
+    }
+
+    @GetMapping("/me/routes-created")
+    public SimplePageResponse<RoutePreviewResponse> getMyCreatedRoutes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        String userId = authUtil.requireUserId();
+        Page<Route> routes = routeRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
+            userId, PageRequest.of(page, size));
+        return new SimplePageResponse<>(
+            routes.getContent().stream().map(RoutePreviewResponse::from).toList(),
+            routes.hasNext()
+        );
     }
 
     @GetMapping("/{userId}/profile")

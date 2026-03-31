@@ -6,6 +6,7 @@
 | [backend-auth](./backend-auth/) | 100% | 2026-03-31 (1d) | Plan, Design |
 | [social-interactions-backend](./social-interactions-backend/) | 97% | 2026-03-31 (1d) | Plan, Design, Analysis, Report |
 | [user-profile-backend](./user-profile-backend/) | 100% | 2026-03-31 (1d) | Plan, Design, Analysis, Report |
+| [experience-posting](./experience-posting/) | 100% | 2026-03-31 (1d) | Plan, Design, Analysis, Report |
 
 ## Documents
 
@@ -35,3 +36,12 @@
 | Design | [user-profile-backend.design.md](./user-profile-backend/user-profile-backend.design.md) |
 | Analysis | [user-profile-backend.analysis.md](./user-profile-backend/user-profile-backend.analysis.md) |
 | Report | [user-profile-backend.report.md](./user-profile-backend/user-profile-backend.report.md) |
+
+### experience-posting (유저 경험 포스팅 — Spot/Route 생성·수정·삭제 + 소유권 검증)
+
+| Document | File |
+|----------|------|
+| Plan | [experience-posting.plan.md](./experience-posting/experience-posting.plan.md) |
+| Design | [experience-posting.design.md](./experience-posting/experience-posting.design.md) |
+| Analysis | [experience-posting.analysis.md](./experience-posting/experience-posting.analysis.md) |
+| Report | [experience-posting.report.md](./experience-posting/experience-posting.report.md) |
