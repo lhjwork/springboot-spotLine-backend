@@ -13,4 +13,5 @@ public interface SpotLikeRepository extends JpaRepository<SpotLike, UUID> {
     Optional<SpotLike> findByUserIdAndSpot(String userId, Spot spot);
     boolean existsByUserIdAndSpot(String userId, Spot spot);
     Page<SpotLike> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
+    long countByUserId(String userId);
 }

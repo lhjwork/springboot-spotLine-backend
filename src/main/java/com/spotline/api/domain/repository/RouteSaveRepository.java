@@ -13,4 +13,5 @@ public interface RouteSaveRepository extends JpaRepository<RouteSave, UUID> {
     Optional<RouteSave> findByUserIdAndRoute(String userId, Route route);
     boolean existsByUserIdAndRoute(String userId, Route route);
     Page<RouteSave> findByUserIdOrderByCreatedAtDesc(String userId, Pageable pageable);
+    long countByUserId(String userId);
 }

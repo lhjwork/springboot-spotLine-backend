@@ -6,11 +6,10 @@
     "level": "Dynamic"
   },
   "pdca": {
-    "feature": "social-interactions-backend",
+    "feature": "user-profile-backend",
     "phase": "archived",
-    "matchRate": 97,
+    "matchRate": 100,
     "iterationCount": 0,
-    "archivedTo": "docs/archive/2026-03/social-interactions-backend/",
     "updatedAt": "2026-03-31T00:00:00.000Z"
   }
 }

@@ -5,8 +5,12 @@ import com.spotline.api.domain.repository.RouteSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.domain.repository.SpotSaveRepository;
 import com.spotline.api.domain.repository.UserRepository;
+import com.spotline.api.dto.request.AvatarUploadRequest;
+import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.*;
 import com.spotline.api.security.AuthUtil;
+import com.spotline.api.service.UserProfileService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +29,26 @@ public class UserController {
     private final SpotLikeRepository spotLikeRepository;
     private final SpotSaveRepository spotSaveRepository;
     private final RouteSaveRepository routeSaveRepository;
+    private final UserProfileService userProfileService;
+
+    @PutMapping("/me/profile")
+    public UserProfileResponse updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
+        return userProfileService.updateProfile(
+            authUtil.requireUserId(), authUtil.getCurrentEmail(), request);
+    }
+
+    @PostMapping("/me/avatar")
+    public AvatarUploadResponse uploadAvatar(@Valid @RequestBody AvatarUploadRequest request) {
+        return userProfileService.generateAvatarUploadUrl(
+            authUtil.requireUserId(), authUtil.getCurrentEmail(),
+            request.getFilename(), request.getContentType());
+    }
+
+    @DeleteMapping("/me/avatar")
+    public UserProfileResponse deleteAvatar() {
+        return userProfileService.deleteAvatar(
+            authUtil.requireUserId(), authUtil.getCurrentEmail());
+    }
 
     @GetMapping("/{userId}/profile")
     public UserProfileResponse getProfile(@PathVariable String userId) {

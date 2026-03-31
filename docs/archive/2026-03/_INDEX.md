@@ -5,6 +5,7 @@
 | phase1-data-model-place-api | 96% | 2026-03-16 ~ 2026-03-19 (4d) | Plan, Design, Analysis, Report |
 | [backend-auth](./backend-auth/) | 100% | 2026-03-31 (1d) | Plan, Design |
 | [social-interactions-backend](./social-interactions-backend/) | 97% | 2026-03-31 (1d) | Plan, Design, Analysis, Report |
+| [user-profile-backend](./user-profile-backend/) | 100% | 2026-03-31 (1d) | Plan, Design, Analysis, Report |
 
 ## Documents
 
@@ -25,3 +26,12 @@
 | Design | [social-interactions-backend.design.md](./social-interactions-backend/social-interactions-backend.design.md) |
 | Analysis | [social-interactions-backend.analysis.md](./social-interactions-backend/social-interactions-backend.analysis.md) |
 | Report | [social-interactions-backend.report.md](./social-interactions-backend/social-interactions-backend.report.md) |
+
+### user-profile-backend (유저 프로필 수정 + 아바타 업로드/삭제 API)
+
+| Document | File |
+|----------|------|
+| Plan | [user-profile-backend.plan.md](./user-profile-backend/user-profile-backend.plan.md) |
+| Design | [user-profile-backend.design.md](./user-profile-backend/user-profile-backend.design.md) |
+| Analysis | [user-profile-backend.analysis.md](./user-profile-backend/user-profile-backend.analysis.md) |
+| Report | [user-profile-backend.report.md](./user-profile-backend/user-profile-backend.report.md) |
