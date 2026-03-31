@@ -7,6 +7,7 @@ import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateRouteRequest;
+import com.spotline.api.dto.request.UpdateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
@@ -115,6 +116,55 @@ public class RouteService {
         route.setTotalDistance(totalDistance);
 
         return routeRepository.save(route);
+    }
+
+    @Transactional
+    public RouteDetailResponse update(String slug, UpdateRouteRequest request) {
+        Route route = getBySlug(slug);
+
+        if (request.getTitle() != null) route.setTitle(request.getTitle());
+        if (request.getDescription() != null) route.setDescription(request.getDescription());
+        if (request.getTheme() != null) route.setTheme(request.getTheme());
+        if (request.getArea() != null) route.setArea(request.getArea());
+
+        if (request.getSpots() != null) {
+            route.getSpots().clear(); // orphanRemoval 자동 삭제
+
+            int totalDuration = 0;
+            int totalDistance = 0;
+            for (int i = 0; i < request.getSpots().size(); i++) {
+                CreateRouteRequest.RouteSpotRequest spotReq = request.getSpots().get(i);
+                Spot spot = spotRepository.findById(spotReq.getSpotId())
+                        .orElseThrow(() -> new ResourceNotFoundException("Spot", spotReq.getSpotId().toString()));
+
+                RouteSpot routeSpot = RouteSpot.builder()
+                        .route(route)
+                        .spot(spot)
+                        .spotOrder(spotReq.getOrder() != null ? spotReq.getOrder() : i + 1)
+                        .suggestedTime(spotReq.getSuggestedTime())
+                        .stayDuration(spotReq.getStayDuration())
+                        .walkingTimeToNext(spotReq.getWalkingTimeToNext())
+                        .distanceToNext(spotReq.getDistanceToNext())
+                        .transitionNote(spotReq.getTransitionNote())
+                        .build();
+
+                route.getSpots().add(routeSpot);
+                if (spotReq.getStayDuration() != null) totalDuration += spotReq.getStayDuration();
+                if (spotReq.getWalkingTimeToNext() != null) totalDuration += spotReq.getWalkingTimeToNext();
+                if (spotReq.getDistanceToNext() != null) totalDistance += spotReq.getDistanceToNext();
+            }
+            route.setTotalDuration(totalDuration);
+            route.setTotalDistance(totalDistance);
+        }
+
+        return RouteDetailResponse.from(routeRepository.save(route));
+    }
+
+    @Transactional
+    public void delete(String slug) {
+        Route route = getBySlug(slug);
+        route.setIsActive(false);
+        routeRepository.save(route);
     }
 
     public List<SlugResponse> getAllSlugs() {

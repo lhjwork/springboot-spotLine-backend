@@ -1,6 +1,7 @@
 package com.spotline.api.controller;
 
 import com.spotline.api.dto.request.CreateRouteRequest;
+import com.spotline.api.dto.request.UpdateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
@@ -44,5 +45,18 @@ public class RouteController {
     @PostMapping
     public ResponseEntity<RouteDetailResponse> create(@Valid @RequestBody CreateRouteRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(routeService.createAndReturn(request));
+    }
+
+    @PutMapping("/{slug}")
+    public ResponseEntity<RouteDetailResponse> update(
+            @PathVariable String slug,
+            @Valid @RequestBody UpdateRouteRequest request) {
+        return ResponseEntity.ok(routeService.update(slug, request));
+    }
+
+    @DeleteMapping("/{slug}")
+    public ResponseEntity<Void> delete(@PathVariable String slug) {
+        routeService.delete(slug);
+        return ResponseEntity.noContent().build();
     }
 }
