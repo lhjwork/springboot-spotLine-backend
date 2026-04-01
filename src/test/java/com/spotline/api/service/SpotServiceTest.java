@@ -48,6 +48,8 @@ class SpotServiceTest {
     private PlaceApiService placeApiService;
     @Mock
     private S3Service s3Service;
+    @Mock
+    private PartnerService partnerService;
     @InjectMocks
     private SpotService spotService;
 

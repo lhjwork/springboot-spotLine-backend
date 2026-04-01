@@ -29,6 +29,10 @@ public class User {
     private String bio;
     private String instagramId;
 
+    /** 역할 — "user" | "admin" */
+    @Builder.Default
+    private String role = "user";
+
     @Builder.Default
     private Integer followersCount = 0;
 

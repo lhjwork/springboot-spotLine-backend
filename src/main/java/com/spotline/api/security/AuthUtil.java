@@ -26,6 +26,16 @@ public class AuthUtil {
         return null;
     }
 
+    /** 현재 사용자의 역할 확인 */
+    public boolean isAdmin() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.getAuthorities() != null) {
+            return auth.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        return false;
+    }
+
     public String requireUserId() {
         String userId = getCurrentUserId();
         if (userId == null) {

@@ -15,6 +15,7 @@ import com.spotline.api.dto.response.DiscoverResponse;
 import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
+import com.spotline.api.dto.response.SpotPartnerInfo;
 import com.spotline.api.infrastructure.place.PlaceApiService;
 import com.spotline.api.infrastructure.place.PlaceInfo;
 import com.spotline.api.infrastructure.s3.S3Service;
@@ -42,6 +43,7 @@ public class SpotService {
     private final RouteRepository routeRepository;
     private final PlaceApiService placeApiService;
     private final S3Service s3Service;
+    private final PartnerService partnerService;
     private final Slugify slugify = Slugify.builder().transliterator(true).build();
 
     /**
@@ -52,7 +54,8 @@ public class SpotService {
                 .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
 
         PlaceInfo placeInfo = resolvePlaceInfo(spot);
-        return SpotDetailResponse.from(spot, placeInfo, getS3BaseUrl());
+        SpotPartnerInfo partnerInfo = partnerService.getPartnerInfoBySpotId(spot.getId());
+        return SpotDetailResponse.from(spot, placeInfo, getS3BaseUrl(), partnerInfo);
     }
 
     /**

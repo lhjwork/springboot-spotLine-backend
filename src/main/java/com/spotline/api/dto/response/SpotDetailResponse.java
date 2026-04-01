@@ -59,8 +59,17 @@ public class SpotDetailResponse {
     /** Place API에서 가져온 매장 상세 (nullable — API 실패 시 null) */
     private PlaceInfo placeInfo;
 
+    /** 파트너 정보 (파트너 매장인 경우에만, 아니면 null) */
+    private SpotPartnerInfo partner;
+
     public static SpotDetailResponse from(Spot spot, PlaceInfo placeInfo) {
         return from(spot, placeInfo, null);
+    }
+
+    public static SpotDetailResponse from(Spot spot, PlaceInfo placeInfo, String s3BaseUrl, SpotPartnerInfo partnerInfo) {
+        SpotDetailResponse response = from(spot, placeInfo, s3BaseUrl);
+        response.setPartner(partnerInfo);
+        return response;
     }
 
     public static SpotDetailResponse from(Spot spot, PlaceInfo placeInfo, String s3BaseUrl) {
