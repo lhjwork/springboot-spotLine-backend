@@ -6,6 +6,8 @@ import com.spotline.api.domain.enums.SpotSource;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
+import com.spotline.api.security.AuthUtil;
+import com.spotline.api.security.JwtTokenProvider;
 import com.spotline.api.service.SpotService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,12 @@ class SpotControllerTest {
 
     @MockitoBean
     private SpotService spotService;
+
+    @MockitoBean
+    private AuthUtil authUtil;
+
+    @MockitoBean
+    private JwtTokenProvider jwtTokenProvider;
 
     @Test
     @DisplayName("GET /api/v2/spots/{slug} - 200 OK")
@@ -89,7 +97,7 @@ class SpotControllerTest {
                 .category(SpotCategory.CAFE)
                 .build();
 
-        given(spotService.create(any(CreateSpotRequest.class))).willReturn(response);
+        given(spotService.create(any(CreateSpotRequest.class), any(), any())).willReturn(response);
 
         mockMvc.perform(post("/api/v2/spots")
                         .with(csrf())

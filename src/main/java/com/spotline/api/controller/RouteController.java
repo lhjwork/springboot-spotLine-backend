@@ -1,5 +1,6 @@
 package com.spotline.api.controller;
 
+import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.dto.request.CreateRouteRequest;
 import com.spotline.api.dto.request.UpdateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
@@ -35,8 +36,10 @@ public class RouteController {
     public ResponseEntity<Page<RoutePreviewResponse>> popular(
             @RequestParam(required = false) String area,
             @RequestParam(required = false) String theme,
+            @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, pageable));
+        FeedSort feedSort = parseFeedSort(sort);
+        return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, feedSort, pageable));
     }
 
     @GetMapping("/slugs")
@@ -62,5 +65,14 @@ public class RouteController {
     public ResponseEntity<Void> delete(@PathVariable String slug) {
         routeService.delete(slug, authUtil.requireUserId());
         return ResponseEntity.noContent().build();
+    }
+
+    private FeedSort parseFeedSort(String sort) {
+        if (sort == null) return FeedSort.POPULAR;
+        try {
+            return FeedSort.valueOf(sort.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return FeedSort.POPULAR;
+        }
     }
 }

@@ -7,6 +7,7 @@ import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
+import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
 import com.spotline.api.infrastructure.place.PlaceApiService;
@@ -145,7 +146,7 @@ class SpotServiceTest {
             return s;
         });
 
-        SpotDetailResponse result = spotService.create(request);
+        SpotDetailResponse result = spotService.create(request, null, "crew");
 
         assertThat(result.getTitle()).isEqualTo("새로운 카페");
         verify(spotRepository).save(any(Spot.class));
@@ -161,7 +162,7 @@ class SpotServiceTest {
         request.setCrewNote("새로운 크루노트");
         request.setArea("을지로");
 
-        SpotDetailResponse result = spotService.update("seongsu-cafe-onion", request);
+        SpotDetailResponse result = spotService.update("seongsu-cafe-onion", request, null);
 
         assertThat(result.getCrewNote()).isEqualTo("새로운 크루노트");
         assertThat(result.getArea()).isEqualTo("을지로");
@@ -175,7 +176,7 @@ class SpotServiceTest {
                 .willReturn(Optional.of(testSpot));
         given(spotRepository.save(any(Spot.class))).willAnswer(inv -> inv.getArgument(0));
 
-        spotService.delete("seongsu-cafe-onion");
+        spotService.delete("seongsu-cafe-onion", null);
 
         assertThat(testSpot.getIsActive()).isFalse();
         verify(spotRepository).save(testSpot);
@@ -185,10 +186,10 @@ class SpotServiceTest {
     @DisplayName("Spot 목록 조회 - area 필터")
     void list_filteredByArea() {
         Page<Spot> page = new PageImpl<>(List.of(testSpot));
-        given(spotRepository.findByAreaAndIsActiveTrue("성수", PageRequest.of(0, 20)))
+        given(spotRepository.findByAreaAndIsActiveTrueOrderByViewsCountDesc("성수", PageRequest.of(0, 20)))
                 .willReturn(page);
 
-        Page<SpotDetailResponse> result = spotService.list("성수", null, PageRequest.of(0, 20));
+        Page<SpotDetailResponse> result = spotService.list("성수", null, FeedSort.POPULAR, PageRequest.of(0, 20));
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getArea()).isEqualTo("성수");
@@ -217,7 +218,7 @@ class SpotServiceTest {
             return s;
         });
 
-        SpotDetailResponse result = spotService.create(request);
+        SpotDetailResponse result = spotService.create(request, null, "crew");
 
         // slug 생성 시 existsBySlug가 호출되어 중복 확인
         verify(spotRepository).existsBySlug("test-cafe");

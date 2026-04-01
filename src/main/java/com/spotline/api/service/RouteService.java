@@ -4,8 +4,11 @@ import com.github.slugify.Slugify;
 import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.entity.RouteSpot;
 import com.spotline.api.domain.entity.Spot;
+import com.spotline.api.domain.enums.FeedSort;
+import com.spotline.api.domain.enums.RouteTheme;
 import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.SpotRepository;
+import com.spotline.api.infrastructure.s3.S3Service;
 import com.spotline.api.dto.request.CreateRouteRequest;
 import com.spotline.api.dto.request.UpdateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
@@ -32,6 +35,7 @@ public class RouteService {
 
     private final RouteRepository routeRepository;
     private final SpotRepository spotRepository;
+    private final S3Service s3Service;
     private final Slugify slugify = Slugify.builder().transliterator(true).build();
 
     public Route getBySlug(String slug) {
@@ -44,8 +48,32 @@ public class RouteService {
         return RouteDetailResponse.from(route);
     }
 
-    public Page<RoutePreviewResponse> getPopularPreviews(String area, String theme, Pageable pageable) {
-        return getPopular(area, theme, pageable).map(RoutePreviewResponse::from);
+    public Page<RoutePreviewResponse> getPopularPreviews(
+            String area, String theme, FeedSort sort, Pageable pageable) {
+        FeedSort effectiveSort = (sort != null) ? sort : FeedSort.POPULAR;
+        Page<Route> routes;
+
+        if (effectiveSort == FeedSort.NEWEST) {
+            routes = getNewest(area, theme, pageable);
+        } else {
+            routes = getPopular(area, theme, pageable);
+        }
+
+        String s3BaseUrl = getS3BaseUrl();
+        return routes.map(route -> RoutePreviewResponse.from(route, s3BaseUrl));
+    }
+
+    private Page<Route> getNewest(String area, String theme, Pageable pageable) {
+        if (area != null && theme != null) {
+            return routeRepository.findByAreaAndThemeAndIsActiveTrueOrderByCreatedAtDesc(
+                    area, RouteTheme.valueOf(theme.toUpperCase()), pageable);
+        } else if (area != null) {
+            return routeRepository.findByAreaAndIsActiveTrueOrderByCreatedAtDesc(area, pageable);
+        } else if (theme != null) {
+            return routeRepository.findByThemeAndIsActiveTrueOrderByCreatedAtDesc(
+                    RouteTheme.valueOf(theme.toUpperCase()), pageable);
+        }
+        return routeRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
     }
 
     @Transactional
@@ -185,6 +213,10 @@ public class RouteService {
                         .updatedAt(r.getUpdatedAt())
                         .build())
                 .toList();
+    }
+
+    private String getS3BaseUrl() {
+        return s3Service.getPublicUrl("").replaceAll("/$", "");
     }
 
     private String generateUniqueSlug(String title) {

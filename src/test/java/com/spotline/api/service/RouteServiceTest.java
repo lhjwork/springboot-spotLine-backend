@@ -7,6 +7,7 @@ import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
 import com.spotline.api.domain.repository.RouteRepository;
 import com.spotline.api.domain.repository.SpotRepository;
+import com.spotline.api.infrastructure.s3.S3Service;
 import com.spotline.api.dto.request.CreateRouteRequest;
 import com.spotline.api.dto.response.RouteDetailResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
@@ -36,6 +37,8 @@ class RouteServiceTest {
     private RouteRepository routeRepository;
     @Mock
     private SpotRepository spotRepository;
+    @Mock
+    private S3Service s3Service;
     @InjectMocks
     private RouteService routeService;
 
@@ -138,7 +141,7 @@ class RouteServiceTest {
             return r;
         });
 
-        Route result = routeService.create(request);
+        Route result = routeService.create(request, null, "crew");
 
         assertThat(result.getSpots()).hasSize(3);
         assertThat(result.getSpots().get(0).getSpotOrder()).isEqualTo(1);
@@ -185,7 +188,7 @@ class RouteServiceTest {
             return r;
         });
 
-        Route result = routeService.create(request);
+        Route result = routeService.create(request, null, "crew");
 
         // totalDuration = 60 + 10 + 90 + 5 + 45 = 210
         assertThat(result.getTotalDuration()).isEqualTo(210);
@@ -209,7 +212,7 @@ class RouteServiceTest {
         given(routeRepository.existsBySlug(anyString())).willReturn(false);
         given(spotRepository.findById(invalidId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> routeService.create(request))
+        assertThatThrownBy(() -> routeService.create(request, null, "crew"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Spot");
     }

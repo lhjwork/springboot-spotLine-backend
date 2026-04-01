@@ -1,8 +1,10 @@
 package com.spotline.api.controller;
 
+import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
 import com.spotline.api.dto.response.DiscoverResponse;
+import com.spotline.api.dto.response.RoutePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.security.AuthUtil;
@@ -18,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v2/spots")
@@ -45,12 +48,20 @@ public class SpotController {
         return ResponseEntity.ok(spotService.getBySlug(slug));
     }
 
+    @GetMapping("/{spotId}/routes")
+    public ResponseEntity<List<RoutePreviewResponse>> getRoutesBySpotId(
+            @PathVariable UUID spotId) {
+        return ResponseEntity.ok(spotService.findRoutesBySpotId(spotId));
+    }
+
     @GetMapping
     public ResponseEntity<Page<SpotDetailResponse>> list(
             @RequestParam(required = false) String area,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
-        return ResponseEntity.ok(spotService.list(area, category, pageable));
+        FeedSort feedSort = parseFeedSort(sort);
+        return ResponseEntity.ok(spotService.list(area, category, feedSort, pageable));
     }
 
     @GetMapping("/nearby")
@@ -90,5 +101,14 @@ public class SpotController {
     public ResponseEntity<List<SpotDetailResponse>> bulkCreate(
             @Valid @RequestBody @Size(max = 50, message = "한 번에 최대 50개까지 등록 가능합니다") List<CreateSpotRequest> requests) {
         return ResponseEntity.status(HttpStatus.CREATED).body(spotService.bulkCreate(requests));
+    }
+
+    private FeedSort parseFeedSort(String sort) {
+        if (sort == null) return FeedSort.POPULAR;
+        try {
+            return FeedSort.valueOf(sort.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return FeedSort.POPULAR;
+        }
     }
 }

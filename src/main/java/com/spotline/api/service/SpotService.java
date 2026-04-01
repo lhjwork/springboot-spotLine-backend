@@ -3,6 +3,8 @@ package com.spotline.api.service;
 import com.github.slugify.Slugify;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotMedia;
+import com.spotline.api.domain.enums.FeedSort;
+import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.MediaItemRequest;
@@ -54,23 +56,61 @@ public class SpotService {
     }
 
     /**
-     * Spot 목록 조회
+     * 특정 Spot이 포함된 활성 Route 프리뷰 목록 반환 (최대 10개)
      */
-    public Page<SpotDetailResponse> list(String area, String category, Pageable pageable) {
+    public List<RoutePreviewResponse> findRoutesBySpotId(UUID spotId) {
+        spotRepository.findById(spotId)
+                .orElseThrow(() -> new ResourceNotFoundException("Spot", spotId.toString()));
+
+        List<Route> routes = routeRepository.findActiveRoutesBySpotId(spotId);
+
+        String s3BaseUrl = getS3BaseUrl();
+        return routes.stream()
+                .limit(10)
+                .map(route -> RoutePreviewResponse.from(route, s3BaseUrl))
+                .toList();
+    }
+
+    /**
+     * Spot 목록 조회 (정렬 지원)
+     */
+    public Page<SpotDetailResponse> list(String area, String category, FeedSort sort, Pageable pageable) {
         Page<Spot> spots;
-        if (area != null && category != null) {
-            spots = spotRepository.findByAreaAndCategoryAndIsActiveTrue(
-                    area, com.spotline.api.domain.enums.SpotCategory.valueOf(category.toUpperCase()), pageable);
-        } else if (area != null) {
-            spots = spotRepository.findByAreaAndIsActiveTrue(area, pageable);
-        } else if (category != null) {
-            spots = spotRepository.findByCategoryAndIsActiveTrue(
-                    com.spotline.api.domain.enums.SpotCategory.valueOf(category.toUpperCase()), pageable);
+        FeedSort effectiveSort = (sort != null) ? sort : FeedSort.POPULAR;
+
+        if (effectiveSort == FeedSort.NEWEST) {
+            spots = listByNewest(area, category, pageable);
         } else {
-            spots = spotRepository.findByIsActiveTrue(pageable);
+            spots = listByPopular(area, category, pageable);
         }
 
-        return spots.map(spot -> SpotDetailResponse.from(spot, null)); // 목록에서는 placeInfo 생략
+        return spots.map(spot -> SpotDetailResponse.from(spot, null));
+    }
+
+    private Page<Spot> listByPopular(String area, String category, Pageable pageable) {
+        if (area != null && category != null) {
+            return spotRepository.findByAreaAndCategoryAndIsActiveTrueOrderByViewsCountDesc(
+                    area, SpotCategory.valueOf(category.toUpperCase()), pageable);
+        } else if (area != null) {
+            return spotRepository.findByAreaAndIsActiveTrueOrderByViewsCountDesc(area, pageable);
+        } else if (category != null) {
+            return spotRepository.findByCategoryAndIsActiveTrueOrderByViewsCountDesc(
+                    SpotCategory.valueOf(category.toUpperCase()), pageable);
+        }
+        return spotRepository.findByIsActiveTrueOrderByViewsCountDesc(pageable);
+    }
+
+    private Page<Spot> listByNewest(String area, String category, Pageable pageable) {
+        if (area != null && category != null) {
+            return spotRepository.findByAreaAndCategoryAndIsActiveTrueOrderByCreatedAtDesc(
+                    area, SpotCategory.valueOf(category.toUpperCase()), pageable);
+        } else if (area != null) {
+            return spotRepository.findByAreaAndIsActiveTrueOrderByCreatedAtDesc(area, pageable);
+        } else if (category != null) {
+            return spotRepository.findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(
+                    SpotCategory.valueOf(category.toUpperCase()), pageable);
+        }
+        return spotRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
     }
 
     /**
