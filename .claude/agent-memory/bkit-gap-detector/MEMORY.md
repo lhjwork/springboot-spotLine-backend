@@ -37,6 +37,31 @@
 - Verbatim match: all code identical to design document specifications
 - Analysis at: docs/03-analysis/user-profile-backend.analysis.md
 
+## Experience Posting Analysis History
+- Feature: experience-posting
+- v0.1 (2026-03-31): Match Rate **100%** -- 0 missing, 0 deviations, 0 extras
+- 12/12 checklist items: 2 repo queries, 6 service methods (create/update/delete x2), 4 controller integrations, 2 user endpoints
+- Verbatim match: all code identical to design document specifications
+- Key pattern: verifyOwnership() with legacy null-check, bulkCreate delegates to create(req, null, "crew")
+- Analysis at: docs/03-analysis/experience-posting.analysis.md
+
+## Feed Discovery API Analysis History
+- Feature: feed-discovery-api
+- v0.1 (2026-04-01): Match Rate **100%** -- 0 missing, 0 deviations, 0 extras
+- 10/10 checklist items (A1-C2): FeedSort enum, RoutePreviewResponse coverImageUrl, RouteRepo JPQL, SpotRepo 8 queries, SpotService findRoutesBySpotId+list sort, RouteService S3Service+coverImageUrl, SpotController+RouteController sort params
+- Verbatim match: all code identical to design document specifications
+- Key pattern: parseFeedSort() duplicated in both controllers (graceful fallback to POPULAR), resolveCoverImageUrl() static private in DTO
+- Analysis at: docs/03-analysis/feed-discovery-api.analysis.md
+
+## QR Partner System Backend Analysis History
+- Feature: qr-partner-system-backend
+- v0.1 (2026-04-01): Match Rate **100%** -- 0 missing, 0 deviations, 0 extras
+- 25/25 checklist items: 2 enums, 3 entities, 3 repos, 3 request DTOs, 4 response DTOs, 1 service, 2 controllers, 2 security mods, 2 spot extensions, 2 tests + 1 test mod
+- 18 new files + 5 modified files, 10 API endpoints, 12 repo methods, 13 service methods
+- Verbatim match: all code identical to design document specifications
+- Key additions: Partner/PartnerQrCode/QrScanLog entities, ROLE_ADMIN security, SpotDetailResponse partner field
+- Analysis at: docs/03-analysis/qr-partner-system-backend.analysis.md
+
 ## Architecture Pattern
 - Layers: controller/ -> service/ -> domain/(entity, enums, repository) + infrastructure/place/
 - DTOs: dto/request/ + dto/response/ (separate from domain)
