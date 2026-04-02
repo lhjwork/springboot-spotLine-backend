@@ -92,10 +92,10 @@ public class SpotService {
 
     private Page<Spot> listByPopular(String area, String category, Pageable pageable) {
         if (area != null && category != null) {
-            return spotRepository.findByAreaAndCategoryAndIsActiveTrueOrderByViewsCountDesc(
+            return spotRepository.findByAreaLikeAndCategoryAndPopular(
                     area, SpotCategory.valueOf(category.toUpperCase()), pageable);
         } else if (area != null) {
-            return spotRepository.findByAreaAndIsActiveTrueOrderByViewsCountDesc(area, pageable);
+            return spotRepository.findByAreaLikeAndPopular(area, pageable);
         } else if (category != null) {
             return spotRepository.findByCategoryAndIsActiveTrueOrderByViewsCountDesc(
                     SpotCategory.valueOf(category.toUpperCase()), pageable);
@@ -105,10 +105,10 @@ public class SpotService {
 
     private Page<Spot> listByNewest(String area, String category, Pageable pageable) {
         if (area != null && category != null) {
-            return spotRepository.findByAreaAndCategoryAndIsActiveTrueOrderByCreatedAtDesc(
+            return spotRepository.findByAreaLikeAndCategoryAndNewest(
                     area, SpotCategory.valueOf(category.toUpperCase()), pageable);
         } else if (area != null) {
-            return spotRepository.findByAreaAndIsActiveTrueOrderByCreatedAtDesc(area, pageable);
+            return spotRepository.findByAreaLikeAndNewest(area, pageable);
         } else if (category != null) {
             return spotRepository.findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(
                     SpotCategory.valueOf(category.toUpperCase()), pageable);
@@ -434,7 +434,7 @@ public class SpotService {
 
     private List<RoutePreviewResponse> findPopularRoutes(String area) {
         if (area == null) return List.of();
-        return routeRepository.findByAreaAndIsActiveTrueOrderByLikesCountDesc(
+        return routeRepository.findByAreaLikeAndPopular(
                         area, org.springframework.data.domain.PageRequest.of(0, 3))
                 .getContent()
                 .stream()

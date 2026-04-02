@@ -65,10 +65,10 @@ public class RouteService {
 
     private Page<Route> getNewest(String area, String theme, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaAndThemeAndIsActiveTrueOrderByCreatedAtDesc(
+            return routeRepository.findByAreaLikeAndThemeAndNewest(
                     area, RouteTheme.valueOf(theme.toUpperCase()), pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaAndIsActiveTrueOrderByCreatedAtDesc(area, pageable);
+            return routeRepository.findByAreaLikeAndNewest(area, pageable);
         } else if (theme != null) {
             return routeRepository.findByThemeAndIsActiveTrueOrderByCreatedAtDesc(
                     RouteTheme.valueOf(theme.toUpperCase()), pageable);
@@ -84,10 +84,10 @@ public class RouteService {
 
     public Page<Route> getPopular(String area, String theme, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaAndThemeAndIsActiveTrueOrderByLikesCountDesc(
+            return routeRepository.findByAreaLikeAndThemeAndPopular(
                     area, com.spotline.api.domain.enums.RouteTheme.valueOf(theme.toUpperCase()), pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaAndIsActiveTrueOrderByLikesCountDesc(area, pageable);
+            return routeRepository.findByAreaLikeAndPopular(area, pageable);
         } else if (theme != null) {
             return routeRepository.findByThemeAndIsActiveTrueOrderByLikesCountDesc(
                     com.spotline.api.domain.enums.RouteTheme.valueOf(theme.toUpperCase()), pageable);

@@ -19,22 +19,25 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
     // ---- Popular (likesCount DESC) ----
     Page<Route> findByIsActiveTrueOrderByLikesCountDesc(Pageable pageable);
 
-    Page<Route> findByAreaAndIsActiveTrueOrderByLikesCountDesc(String area, Pageable pageable);
-
     Page<Route> findByThemeAndIsActiveTrueOrderByLikesCountDesc(RouteTheme theme, Pageable pageable);
 
-    Page<Route> findByAreaAndThemeAndIsActiveTrueOrderByLikesCountDesc(
-            String area, RouteTheme theme, Pageable pageable);
+    // ---- Area LIKE 매칭 (연남 → 연남, 연남동 모두 매칭) ----
+    @Query("SELECT r FROM Route r WHERE r.isActive = true AND r.area LIKE %:area% ORDER BY r.likesCount DESC")
+    Page<Route> findByAreaLikeAndPopular(@Param("area") String area, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true AND r.area LIKE %:area% AND r.theme = :theme ORDER BY r.likesCount DESC")
+    Page<Route> findByAreaLikeAndThemeAndPopular(@Param("area") String area, @Param("theme") RouteTheme theme, Pageable pageable);
 
     // ---- Newest (createdAt DESC) ----
     Page<Route> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
 
-    Page<Route> findByAreaAndIsActiveTrueOrderByCreatedAtDesc(String area, Pageable pageable);
-
     Page<Route> findByThemeAndIsActiveTrueOrderByCreatedAtDesc(RouteTheme theme, Pageable pageable);
 
-    Page<Route> findByAreaAndThemeAndIsActiveTrueOrderByCreatedAtDesc(
-            String area, RouteTheme theme, Pageable pageable);
+    @Query("SELECT r FROM Route r WHERE r.isActive = true AND r.area LIKE %:area% ORDER BY r.createdAt DESC")
+    Page<Route> findByAreaLikeAndNewest(@Param("area") String area, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true AND r.area LIKE %:area% AND r.theme = :theme ORDER BY r.createdAt DESC")
+    Page<Route> findByAreaLikeAndThemeAndNewest(@Param("area") String area, @Param("theme") RouteTheme theme, Pageable pageable);
 
     // ---- FR-01: Spot이 포함된 Route 조회 ----
     @Query("SELECT DISTINCT r FROM Route r " +

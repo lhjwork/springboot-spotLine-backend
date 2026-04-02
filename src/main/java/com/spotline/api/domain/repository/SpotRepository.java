@@ -19,31 +19,30 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
     // ---- 기존 (무정렬) ----
     Page<Spot> findByIsActiveTrue(Pageable pageable);
 
-    Page<Spot> findByAreaAndIsActiveTrue(String area, Pageable pageable);
-
     Page<Spot> findByCategoryAndIsActiveTrue(SpotCategory category, Pageable pageable);
 
-    Page<Spot> findByAreaAndCategoryAndIsActiveTrue(String area, SpotCategory category, Pageable pageable);
+    // ---- Area 필터: LIKE 매칭 (연남 → 연남, 연남동 모두 매칭) ----
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% ORDER BY s.viewsCount DESC")
+    Page<Spot> findByAreaLikeAndPopular(@Param("area") String area, Pageable pageable);
 
-    // ---- Popular (viewsCount DESC) ----
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% AND s.category = :category ORDER BY s.viewsCount DESC")
+    Page<Spot> findByAreaLikeAndCategoryAndPopular(@Param("area") String area, @Param("category") SpotCategory category, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% ORDER BY s.createdAt DESC")
+    Page<Spot> findByAreaLikeAndNewest(@Param("area") String area, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% AND s.category = :category ORDER BY s.createdAt DESC")
+    Page<Spot> findByAreaLikeAndCategoryAndNewest(@Param("area") String area, @Param("category") SpotCategory category, Pageable pageable);
+
+    // ---- Popular (viewsCount DESC) — area 없는 경우 ----
     Page<Spot> findByIsActiveTrueOrderByViewsCountDesc(Pageable pageable);
-
-    Page<Spot> findByAreaAndIsActiveTrueOrderByViewsCountDesc(String area, Pageable pageable);
 
     Page<Spot> findByCategoryAndIsActiveTrueOrderByViewsCountDesc(SpotCategory category, Pageable pageable);
 
-    Page<Spot> findByAreaAndCategoryAndIsActiveTrueOrderByViewsCountDesc(
-            String area, SpotCategory category, Pageable pageable);
-
-    // ---- Newest (createdAt DESC) ----
+    // ---- Newest (createdAt DESC) — area 없는 경우 ----
     Page<Spot> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
 
-    Page<Spot> findByAreaAndIsActiveTrueOrderByCreatedAtDesc(String area, Pageable pageable);
-
     Page<Spot> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(SpotCategory category, Pageable pageable);
-
-    Page<Spot> findByAreaAndCategoryAndIsActiveTrueOrderByCreatedAtDesc(
-            String area, SpotCategory category, Pageable pageable);
 
     @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
             "AND s.latitude BETWEEN :minLat AND :maxLat " +
