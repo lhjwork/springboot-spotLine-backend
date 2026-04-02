@@ -128,8 +128,9 @@ public class SpotService {
                 lat - latDelta, lat + latDelta,
                 lng - lngDelta, lng + lngDelta);
 
+        String s3Base = getS3BaseUrl();
         return spots.stream()
-                .map(spot -> SpotDetailResponse.from(spot, null))
+                .map(spot -> SpotDetailResponse.from(spot, null, s3Base))
                 .toList();
     }
 
@@ -248,6 +249,8 @@ public class SpotService {
      * Location-based discovery — currentSpot + nextSpot recommendation
      */
     public DiscoverResponse discover(double lat, double lng, double radiusKm, UUID excludeSpotId) {
+        String s3Base = getS3BaseUrl();
+
         // Step 1: Find nearest spot (expanding radius: 1km → 3km → 5km)
         Spot currentSpot = findNearestSpot(lat, lng, excludeSpotId);
 
@@ -271,7 +274,7 @@ public class SpotService {
             int walkingTime = (int) Math.ceil(distanceBetween / 67.0); // ~80m/min walking speed
 
             nextSpotInfo = DiscoverResponse.NextSpotInfo.builder()
-                    .spot(SpotDetailResponse.from(nextSpot, nextPlaceInfo))
+                    .spot(SpotDetailResponse.from(nextSpot, nextPlaceInfo, s3Base))
                     .placeInfo(nextPlaceInfo)
                     .distanceFromCurrent(distanceBetween)
                     .walkingTime(walkingTime)
@@ -288,7 +291,7 @@ public class SpotService {
 
         return DiscoverResponse.builder()
                 .currentSpot(DiscoverResponse.CurrentSpotInfo.builder()
-                        .spot(SpotDetailResponse.from(currentSpot, currentPlaceInfo))
+                        .spot(SpotDetailResponse.from(currentSpot, currentPlaceInfo, s3Base))
                         .placeInfo(currentPlaceInfo)
                         .distanceFromUser(distanceFromUser)
                         .build())
@@ -367,15 +370,18 @@ public class SpotService {
             if (id != null) excludeSet.add(id);
         }
 
+        String s3Base = getS3BaseUrl();
         return spots.stream()
                 .filter(s -> !excludeSet.contains(s.getId()))
                 .sorted((a, b) -> Integer.compare(b.getViewsCount(), a.getViewsCount()))
                 .limit(6)
-                .map(spot -> SpotDetailResponse.from(spot, null))
+                .map(spot -> SpotDetailResponse.from(spot, null, s3Base))
                 .toList();
     }
 
     private DiscoverResponse buildFallbackResponse() {
+        String s3Base = getS3BaseUrl();
+
         // Return most popular spot overall
         List<Spot> popular = spotRepository.findByIsActiveTrue(
                 org.springframework.data.domain.PageRequest.of(0, 7,
@@ -406,7 +412,7 @@ public class SpotService {
                     topSpot.getLatitude(), topSpot.getLongitude(),
                     nextSpot.getLatitude(), nextSpot.getLongitude());
             nextSpotInfo = DiscoverResponse.NextSpotInfo.builder()
-                    .spot(SpotDetailResponse.from(nextSpot, nextPlaceInfo))
+                    .spot(SpotDetailResponse.from(nextSpot, nextPlaceInfo, s3Base))
                     .placeInfo(nextPlaceInfo)
                     .distanceFromCurrent(dist)
                     .walkingTime((int) Math.ceil(dist / 67.0))
@@ -416,12 +422,12 @@ public class SpotService {
         List<SpotDetailResponse> nearby = popular.stream()
                 .skip(nextSpot != null ? 2 : 1)
                 .limit(6)
-                .map(s -> SpotDetailResponse.from(s, null))
+                .map(s -> SpotDetailResponse.from(s, null, s3Base))
                 .toList();
 
         return DiscoverResponse.builder()
                 .currentSpot(DiscoverResponse.CurrentSpotInfo.builder()
-                        .spot(SpotDetailResponse.from(topSpot, topPlaceInfo))
+                        .spot(SpotDetailResponse.from(topSpot, topPlaceInfo, s3Base))
                         .placeInfo(topPlaceInfo)
                         .distanceFromUser(0)
                         .build())
