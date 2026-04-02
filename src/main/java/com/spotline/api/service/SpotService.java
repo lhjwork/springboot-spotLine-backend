@@ -87,7 +87,8 @@ public class SpotService {
             spots = listByPopular(area, category, pageable);
         }
 
-        return spots.map(spot -> SpotDetailResponse.from(spot, null));
+        String s3BaseUrl = getS3BaseUrl();
+        return spots.map(spot -> SpotDetailResponse.from(spot, null, s3BaseUrl));
     }
 
     private Page<Spot> listByPopular(String area, String category, Pageable pageable) {
