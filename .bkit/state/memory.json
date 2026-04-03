@@ -6,10 +6,10 @@
     "level": "Dynamic"
   },
   "pdca": {
-    "feature": "qr-partner-system-backend",
-    "phase": "archived",
-    "matchRate": 100,
+    "feature": "comment-system",
+    "phase": "completed",
+    "matchRate": 91,
     "iterationCount": 0,
-    "updatedAt": "2026-04-01T00:00:00.000Z"
+    "updatedAt": "2026-04-03T00:00:00.000Z"
   }
 }
