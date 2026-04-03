@@ -81,6 +81,12 @@ public class PartnerController {
         return ResponseEntity.ok(partnerService.updateQrCode(id, qrCodeId, isActive));
     }
 
+    @DeleteMapping("/{id}/qr-codes/{qrCodeId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteQrCode(@PathVariable UUID id, @PathVariable UUID qrCodeId) {
+        partnerService.deleteQrCode(id, qrCodeId);
+    }
+
     // ---- Analytics ----
 
     @GetMapping("/{id}/analytics")

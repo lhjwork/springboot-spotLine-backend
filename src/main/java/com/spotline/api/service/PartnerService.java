@@ -26,9 +26,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -156,6 +156,19 @@ public class PartnerService {
         return PartnerQrCodeResponse.from(qrCode);
     }
 
+    /** QR 코드 삭제 (soft delete) */
+    @Transactional
+    public void deleteQrCode(UUID partnerId, UUID qrCodeId) {
+        PartnerQrCode qrCode = qrCodeRepository.findById(qrCodeId)
+                .orElseThrow(() -> new ResourceNotFoundException("QrCode", qrCodeId.toString()));
+
+        if (!qrCode.getPartner().getId().equals(partnerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "해당 파트너의 QR 코드가 아닙니다");
+        }
+
+        qrCode.setIsActive(false);
+    }
+
     // ---- QR Scan ----
 
     /** QR 스캔 로그 기록 + 카운트 증가 */
@@ -197,6 +210,11 @@ public class PartnerService {
 
         double conversionRate = totalScans > 0 ? (double) uniqueVisitors / totalScans : 0;
 
+        List<Object[]> rawDaily = scanLogRepository.findDailyScansByPartnerId(partnerId, since);
+        List<PartnerAnalyticsResponse.DailyScanTrend> dailyTrend = buildDailyTrend(since, rawDaily);
+
+        LocalDateTime lastScanAt = scanLogRepository.findLastScanAtByPartnerId(partnerId);
+
         return PartnerAnalyticsResponse.builder()
                 .partnerId(partnerId)
                 .spotTitle(partner.getSpot().getTitle())
@@ -204,6 +222,8 @@ public class PartnerService {
                 .totalScans(totalScans)
                 .uniqueVisitors(uniqueVisitors)
                 .conversionRate(Math.round(conversionRate * 100.0) / 100.0)
+                .lastScanAt(lastScanAt)
+                .dailyTrend(dailyTrend)
                 .build();
     }
 
@@ -228,6 +248,26 @@ public class PartnerService {
             qrId = "partner-" + spotSlug + "-" + String.format("%03d", count);
         }
         return qrId;
+    }
+
+    private List<PartnerAnalyticsResponse.DailyScanTrend> buildDailyTrend(
+            LocalDateTime since, List<Object[]> rawDaily) {
+        Map<String, Long> dateMap = new LinkedHashMap<>();
+        for (Object[] row : rawDaily) {
+            String date = row[0].toString().substring(0, 10);
+            long count = ((Number) row[1]).longValue();
+            dateMap.put(date, count);
+        }
+
+        List<PartnerAnalyticsResponse.DailyScanTrend> result = new ArrayList<>();
+        LocalDate start = since.toLocalDate();
+        LocalDate end = LocalDate.now();
+        for (LocalDate d = start; !d.isAfter(end); d = d.plusDays(1)) {
+            String dateStr = d.toString();
+            result.add(new PartnerAnalyticsResponse.DailyScanTrend(
+                    dateStr, dateMap.getOrDefault(dateStr, 0L)));
+        }
+        return result;
     }
 
     private LocalDateTime parsePeriod(String period) {
