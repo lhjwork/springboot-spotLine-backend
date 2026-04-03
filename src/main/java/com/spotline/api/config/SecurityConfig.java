@@ -32,6 +32,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v2/routes/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/places/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/users/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v2/comments/**").permitAll()
                         .requestMatchers("/actuator/health", "/actuator/info").permitAll()
                         .requestMatchers("/health").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()

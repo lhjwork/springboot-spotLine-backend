@@ -29,6 +29,7 @@ public class RouteDetailResponse {
     private Integer savesCount;
     private Integer replicationsCount;
     private Integer completionsCount;
+    private Integer commentsCount;
 
     // Creator
     private String creatorType;
@@ -82,6 +83,7 @@ public class RouteDetailResponse {
                 .savesCount(route.getSavesCount())
                 .replicationsCount(route.getReplicationsCount())
                 .completionsCount(route.getCompletionsCount())
+                .commentsCount(route.getCommentsCount())
                 .creatorType(route.getCreatorType())
                 .creatorName(route.getCreatorName())
                 .parentRouteId(route.getParentRoute() != null ? route.getParentRoute().getId() : null)

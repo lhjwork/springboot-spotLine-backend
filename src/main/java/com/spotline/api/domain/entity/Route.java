@@ -70,6 +70,8 @@ public class Route {
     private Integer replicationsCount = 0;
     @Builder.Default
     private Integer completionsCount = 0;
+    @Builder.Default
+    private Integer commentsCount = 0;
 
     // ---- Creator ----
     @Column(nullable = false)
