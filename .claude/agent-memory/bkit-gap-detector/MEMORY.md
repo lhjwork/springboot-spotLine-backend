@@ -62,6 +62,25 @@
 - Key additions: Partner/PartnerQrCode/QrScanLog entities, ROLE_ADMIN security, SpotDetailResponse partner field
 - Analysis at: docs/03-analysis/qr-partner-system-backend.analysis.md
 
+## Spot/Route Search Analysis History
+- Feature: spot-route-search (cross-repo: admin-spotLine + backend)
+- v0.1 (2026-04-03): Match Rate **100%** -- 0 missing, 0 deviations, 0 extras
+- 48/48 checklist items: 8+8 repo queries, 6+6 service changes, 2+2 controller params, 2+2 API type changes, 9+9 UI changes
+- 10 files across 2 repos (6 backend + 4 admin frontend)
+- Verbatim match: all code identical to design document specifications
+- Key pattern: keyword LIKE queries (title OR crewNote/description), 300ms debounce, hasKeyword guard
+- Design doc at: admin-spotLine/docs/02-design/features/spot-route-search.design.md
+- Analysis at: admin-spotLine/docs/03-analysis/spot-route-search.analysis.md
+
+## Comment System Analysis History
+- Feature: comment-system (cross-repo: backend + front-spotLine)
+- v0.1 (2026-04-03): Match Rate **91%** -- 2 missing (tests), 1 minor deviation, 4 beneficial extras
+- 21/23 checklist items: 1 enum, 1 entity, 1 repo, 2 request DTOs, 1 response DTO, 1 service, 1 controller, 1 security mod, 2 entity mods, 2 DTO mods, 4 frontend components, 2 page integrations, 1 types mod, 1 api mod
+- Missing: CommentServiceTest (9 cases), CommentControllerTest (5 cases) -- 14 test cases total
+- Minor deviation: DELETE returns 204 No Content + void (design: 200 + body) -- better REST practice
+- Beneficial extras: countByIsDeletedFalse repo method, Math.max(0,...) guard, idempotent delete, reply collapse/expand
+- Analysis at: docs/03-analysis/comment-system.analysis.md
+
 ## Architecture Pattern
 - Layers: controller/ -> service/ -> domain/(entity, enums, repository) + infrastructure/place/
 - DTOs: dto/request/ + dto/response/ (separate from domain)

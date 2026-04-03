@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -117,4 +118,17 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
 
     @Query("SELECT s FROM Spot s WHERE s.isActive = true ORDER BY s.updatedAt DESC")
     List<Spot> findAllActiveSlugs();
+
+    // ---- Analytics ----
+
+    long countByIsActiveTrue();
+
+    List<Spot> findTop10ByIsActiveTrueOrderByViewsCountDesc();
+
+    @Query("SELECT COALESCE(SUM(s.viewsCount), 0) FROM Spot s WHERE s.isActive = true")
+    long sumViewsCountByIsActiveTrue();
+
+    @Query("SELECT CAST(s.createdAt AS LocalDate) as date, COUNT(s) as cnt " +
+           "FROM Spot s WHERE s.createdAt >= :since GROUP BY CAST(s.createdAt AS LocalDate)")
+    List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
 }

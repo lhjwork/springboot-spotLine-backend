@@ -63,6 +63,9 @@ public class Route {
 
     // ---- Stats ----
     @Builder.Default
+    @Column(nullable = false)
+    private Integer viewsCount = 0;
+    @Builder.Default
     private Integer likesCount = 0;
     @Builder.Default
     private Integer savesCount = 0;

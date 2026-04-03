@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -109,4 +110,17 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
 
     @Query("SELECT r FROM Route r WHERE r.isActive = true ORDER BY r.updatedAt DESC")
     List<Route> findAllActiveSlugs();
+
+    // ---- Analytics ----
+
+    long countByIsActiveTrue();
+
+    List<Route> findTop10ByIsActiveTrueOrderByViewsCountDesc();
+
+    @Query("SELECT COALESCE(SUM(r.viewsCount), 0) FROM Route r WHERE r.isActive = true")
+    long sumViewsCountByIsActiveTrue();
+
+    @Query("SELECT CAST(r.createdAt AS LocalDate) as date, COUNT(r) as cnt " +
+           "FROM Route r WHERE r.createdAt >= :since GROUP BY CAST(r.createdAt AS LocalDate)")
+    List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
 }
