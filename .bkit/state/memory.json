@@ -6,9 +6,9 @@
     "level": "Dynamic"
   },
   "pdca": {
-    "feature": "comment-system",
-    "phase": "archived",
-    "matchRate": 91,
+    "feature": "partner-admin-completion",
+    "phase": "design",
+    "matchRate": null,
     "iterationCount": 0,
     "updatedAt": "2026-04-03T00:00:00.000Z"
   }
