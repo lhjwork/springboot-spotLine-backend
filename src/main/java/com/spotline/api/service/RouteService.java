@@ -49,14 +49,19 @@ public class RouteService {
     }
 
     public Page<RoutePreviewResponse> getPopularPreviews(
-            String area, String theme, FeedSort sort, Pageable pageable) {
+            String area, String theme, String keyword, FeedSort sort, Pageable pageable) {
         FeedSort effectiveSort = (sort != null) ? sort : FeedSort.POPULAR;
         Page<Route> routes;
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
 
         if (effectiveSort == FeedSort.NEWEST) {
-            routes = getNewest(area, theme, pageable);
+            routes = hasKeyword
+                ? getNewestWithKeyword(area, theme, keyword, pageable)
+                : getNewest(area, theme, pageable);
         } else {
-            routes = getPopular(area, theme, pageable);
+            routes = hasKeyword
+                ? getPopularWithKeyword(area, theme, keyword, pageable)
+                : getPopular(area, theme, pageable);
         }
 
         String s3BaseUrl = getS3BaseUrl();
@@ -74,6 +79,32 @@ public class RouteService {
                     RouteTheme.valueOf(theme.toUpperCase()), pageable);
         }
         return routeRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    private Page<Route> getPopularWithKeyword(String area, String theme, String keyword, Pageable pageable) {
+        if (area != null && theme != null) {
+            return routeRepository.findByAreaLikeAndThemeAndKeywordAndPopular(
+                    area, RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+        } else if (area != null) {
+            return routeRepository.findByAreaLikeAndKeywordAndPopular(area, keyword, pageable);
+        } else if (theme != null) {
+            return routeRepository.findByThemeAndKeywordAndPopular(
+                    RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+        }
+        return routeRepository.findByKeywordAndPopular(keyword, pageable);
+    }
+
+    private Page<Route> getNewestWithKeyword(String area, String theme, String keyword, Pageable pageable) {
+        if (area != null && theme != null) {
+            return routeRepository.findByAreaLikeAndThemeAndKeywordAndNewest(
+                    area, RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+        } else if (area != null) {
+            return routeRepository.findByAreaLikeAndKeywordAndNewest(area, keyword, pageable);
+        } else if (theme != null) {
+            return routeRepository.findByThemeAndKeywordAndNewest(
+                    RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+        }
+        return routeRepository.findByKeywordAndNewest(keyword, pageable);
     }
 
     @Transactional

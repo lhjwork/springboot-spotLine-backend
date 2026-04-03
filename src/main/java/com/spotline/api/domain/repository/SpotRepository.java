@@ -44,6 +44,64 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
 
     Page<Spot> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(SpotCategory category, Pageable pageable);
 
+    // ---- Keyword 검색 (title OR crewNote LIKE) ----
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.viewsCount DESC")
+    Page<Spot> findByKeywordAndPopular(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.createdAt DESC")
+    Page<Spot> findByKeywordAndNewest(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.area LIKE %:area% " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.viewsCount DESC")
+    Page<Spot> findByAreaLikeAndKeywordAndPopular(
+        @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.area LIKE %:area% " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.createdAt DESC")
+    Page<Spot> findByAreaLikeAndKeywordAndNewest(
+        @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.category = :category " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.viewsCount DESC")
+    Page<Spot> findByCategoryAndKeywordAndPopular(
+        @Param("category") SpotCategory category, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.category = :category " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.createdAt DESC")
+    Page<Spot> findByCategoryAndKeywordAndNewest(
+        @Param("category") SpotCategory category, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.area LIKE %:area% AND s.category = :category " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.viewsCount DESC")
+    Page<Spot> findByAreaLikeAndCategoryAndKeywordAndPopular(
+        @Param("area") String area, @Param("category") SpotCategory category,
+        @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+           "AND s.area LIKE %:area% AND s.category = :category " +
+           "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
+           "ORDER BY s.createdAt DESC")
+    Page<Spot> findByAreaLikeAndCategoryAndKeywordAndNewest(
+        @Param("area") String area, @Param("category") SpotCategory category,
+        @Param("keyword") String keyword, Pageable pageable);
+
+    // ---- Nearby ----
+
     @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
             "AND s.latitude BETWEEN :minLat AND :maxLat " +
             "AND s.longitude BETWEEN :minLng AND :maxLng")

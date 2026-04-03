@@ -36,10 +36,11 @@ public class RouteController {
     public ResponseEntity<Page<RoutePreviewResponse>> popular(
             @RequestParam(required = false) String area,
             @RequestParam(required = false) String theme,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
         FeedSort feedSort = parseFeedSort(sort);
-        return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, feedSort, pageable));
+        return ResponseEntity.ok(routeService.getPopularPreviews(area, theme, keyword, feedSort, pageable));
     }
 
     @GetMapping("/slugs")

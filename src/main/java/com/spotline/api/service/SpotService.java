@@ -77,14 +77,19 @@ public class SpotService {
     /**
      * Spot 목록 조회 (정렬 지원)
      */
-    public Page<SpotDetailResponse> list(String area, String category, FeedSort sort, Pageable pageable) {
+    public Page<SpotDetailResponse> list(String area, String category, String keyword, FeedSort sort, Pageable pageable) {
         Page<Spot> spots;
         FeedSort effectiveSort = (sort != null) ? sort : FeedSort.POPULAR;
+        boolean hasKeyword = keyword != null && !keyword.isBlank();
 
         if (effectiveSort == FeedSort.NEWEST) {
-            spots = listByNewest(area, category, pageable);
+            spots = hasKeyword
+                ? listByNewestWithKeyword(area, category, keyword, pageable)
+                : listByNewest(area, category, pageable);
         } else {
-            spots = listByPopular(area, category, pageable);
+            spots = hasKeyword
+                ? listByPopularWithKeyword(area, category, keyword, pageable)
+                : listByPopular(area, category, pageable);
         }
 
         String s3BaseUrl = getS3BaseUrl();
@@ -115,6 +120,32 @@ public class SpotService {
                     SpotCategory.valueOf(category.toUpperCase()), pageable);
         }
         return spotRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
+    }
+
+    private Page<Spot> listByPopularWithKeyword(String area, String category, String keyword, Pageable pageable) {
+        if (area != null && category != null) {
+            return spotRepository.findByAreaLikeAndCategoryAndKeywordAndPopular(
+                    area, SpotCategory.valueOf(category.toUpperCase()), keyword, pageable);
+        } else if (area != null) {
+            return spotRepository.findByAreaLikeAndKeywordAndPopular(area, keyword, pageable);
+        } else if (category != null) {
+            return spotRepository.findByCategoryAndKeywordAndPopular(
+                    SpotCategory.valueOf(category.toUpperCase()), keyword, pageable);
+        }
+        return spotRepository.findByKeywordAndPopular(keyword, pageable);
+    }
+
+    private Page<Spot> listByNewestWithKeyword(String area, String category, String keyword, Pageable pageable) {
+        if (area != null && category != null) {
+            return spotRepository.findByAreaLikeAndCategoryAndKeywordAndNewest(
+                    area, SpotCategory.valueOf(category.toUpperCase()), keyword, pageable);
+        } else if (area != null) {
+            return spotRepository.findByAreaLikeAndKeywordAndNewest(area, keyword, pageable);
+        } else if (category != null) {
+            return spotRepository.findByCategoryAndKeywordAndNewest(
+                    SpotCategory.valueOf(category.toUpperCase()), keyword, pageable);
+        }
+        return spotRepository.findByKeywordAndNewest(keyword, pageable);
     }
 
     /**

@@ -39,6 +39,62 @@ public interface RouteRepository extends JpaRepository<Route, UUID> {
     @Query("SELECT r FROM Route r WHERE r.isActive = true AND r.area LIKE %:area% AND r.theme = :theme ORDER BY r.createdAt DESC")
     Page<Route> findByAreaLikeAndThemeAndNewest(@Param("area") String area, @Param("theme") RouteTheme theme, Pageable pageable);
 
+    // ---- Keyword 검색 (title OR description LIKE) ----
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.likesCount DESC")
+    Page<Route> findByKeywordAndPopular(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.createdAt DESC")
+    Page<Route> findByKeywordAndNewest(@Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.area LIKE %:area% " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.likesCount DESC")
+    Page<Route> findByAreaLikeAndKeywordAndPopular(
+        @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.area LIKE %:area% " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.createdAt DESC")
+    Page<Route> findByAreaLikeAndKeywordAndNewest(
+        @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.theme = :theme " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.likesCount DESC")
+    Page<Route> findByThemeAndKeywordAndPopular(
+        @Param("theme") RouteTheme theme, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.theme = :theme " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.createdAt DESC")
+    Page<Route> findByThemeAndKeywordAndNewest(
+        @Param("theme") RouteTheme theme, @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.area LIKE %:area% AND r.theme = :theme " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.likesCount DESC")
+    Page<Route> findByAreaLikeAndThemeAndKeywordAndPopular(
+        @Param("area") String area, @Param("theme") RouteTheme theme,
+        @Param("keyword") String keyword, Pageable pageable);
+
+    @Query("SELECT r FROM Route r WHERE r.isActive = true " +
+           "AND r.area LIKE %:area% AND r.theme = :theme " +
+           "AND (r.title LIKE %:keyword% OR r.description LIKE %:keyword%) " +
+           "ORDER BY r.createdAt DESC")
+    Page<Route> findByAreaLikeAndThemeAndKeywordAndNewest(
+        @Param("area") String area, @Param("theme") RouteTheme theme,
+        @Param("keyword") String keyword, Pageable pageable);
+
     // ---- FR-01: Spot이 포함된 Route 조회 ----
     @Query("SELECT DISTINCT r FROM Route r " +
            "JOIN FETCH r.spots rs " +

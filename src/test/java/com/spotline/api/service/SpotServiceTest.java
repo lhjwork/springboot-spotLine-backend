@@ -188,10 +188,10 @@ class SpotServiceTest {
     @DisplayName("Spot 목록 조회 - area 필터")
     void list_filteredByArea() {
         Page<Spot> page = new PageImpl<>(List.of(testSpot));
-        given(spotRepository.findByAreaAndIsActiveTrueOrderByViewsCountDesc("성수", PageRequest.of(0, 20)))
+        given(spotRepository.findByAreaLikeAndPopular("성수", PageRequest.of(0, 20)))
                 .willReturn(page);
 
-        Page<SpotDetailResponse> result = spotService.list("성수", null, FeedSort.POPULAR, PageRequest.of(0, 20));
+        Page<SpotDetailResponse> result = spotService.list("성수", null, null, FeedSort.POPULAR, PageRequest.of(0, 20));
 
         assertThat(result.getContent()).hasSize(1);
         assertThat(result.getContent().get(0).getArea()).isEqualTo("성수");

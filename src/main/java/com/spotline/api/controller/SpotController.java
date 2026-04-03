@@ -58,10 +58,11 @@ public class SpotController {
     public ResponseEntity<Page<SpotDetailResponse>> list(
             @RequestParam(required = false) String area,
             @RequestParam(required = false) String category,
+            @RequestParam(required = false) String keyword,
             @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
         FeedSort feedSort = parseFeedSort(sort);
-        return ResponseEntity.ok(spotService.list(area, category, feedSort, pageable));
+        return ResponseEntity.ok(spotService.list(area, category, keyword, feedSort, pageable));
     }
 
     @GetMapping("/nearby")
