@@ -81,6 +81,14 @@
 - Beneficial extras: countByIsDeletedFalse repo method, Math.max(0,...) guard, idempotent delete, reply collapse/expand
 - Analysis at: docs/03-analysis/comment-system.analysis.md
 
+## Backend API Docs Analysis History
+- Feature: backend-api-docs
+- v0.1 (2026-04-04): Match Rate **97%** -- 2 missing field-level @Schema, 10 beneficial extras
+- 7/7 design steps: dependency, OpenApiConfig, properties+security+prod, 14 controllers (71 ops), request DTOs, response DTOs, API_DOCUMENTATION.md
+- Missing: CreateSpotRequest.mediaItems @Schema, CreateRouteRequest.spots @Schema
+- Beneficial extras: 5 extra request DTO @Schema + 5 extra response DTO @Schema
+- Analysis at: docs/03-analysis/backend-api-docs.analysis.md
+
 ## Architecture Pattern
 - Layers: controller/ -> service/ -> domain/(entity, enums, repository) + infrastructure/place/
 - DTOs: dto/request/ + dto/response/ (separate from domain)

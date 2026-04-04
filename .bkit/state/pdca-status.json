@@ -1,18 +1,25 @@
 {
   "version": "2.0",
-  "lastUpdated": "2026-03-16T11:21:15.244Z",
-  "activeFeatures": [],
-  "primaryFeature": null,
-  "features": {},
+  "lastUpdated": "2026-04-04T00:00:00.000Z",
+  "activeFeatures": ["backend-api-docs"],
+  "primaryFeature": "backend-api-docs",
+  "features": {
+    "backend-api-docs": {
+      "phase": "design",
+      "matchRate": 0,
+      "iterationCount": 0,
+      "startedAt": "2026-04-04T00:00:00.000Z"
+    }
+  },
   "pipeline": {
     "currentPhase": 1,
     "level": "Dynamic",
     "phaseHistory": []
   },
   "session": {
-    "startedAt": "2026-03-16T11:21:15.244Z",
-    "onboardingCompleted": false,
-    "lastActivity": "2026-03-16T11:21:15.244Z"
+    "startedAt": "2026-04-04T00:00:00.000Z",
+    "onboardingCompleted": true,
+    "lastActivity": "2026-04-04T00:00:00.000Z"
   },
   "history": []
 }
