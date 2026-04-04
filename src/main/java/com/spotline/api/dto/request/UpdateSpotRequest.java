@@ -1,11 +1,13 @@
 package com.spotline.api.dto.request;
 
 import com.spotline.api.domain.enums.SpotCategory;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.util.List;
 
 @Data
+@Schema(description = "스팟 수정 요청")
 public class UpdateSpotRequest {
     private String title;
     private String description;

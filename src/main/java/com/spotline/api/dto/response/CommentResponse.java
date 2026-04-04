@@ -2,6 +2,7 @@ package com.spotline.api.dto.response;
 
 import com.spotline.api.domain.entity.Comment;
 import com.spotline.api.domain.enums.CommentTargetType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "댓글 응답")
 @Data
 @Builder
 public class CommentResponse {

@@ -2,11 +2,13 @@ package com.spotline.api.dto.response;
 
 import com.spotline.api.domain.entity.Partner;
 import com.spotline.api.domain.enums.PartnerTier;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDate;
 
+@Schema(description = "스팟 파트너 정보")
 @Data
 @Builder
 public class SpotPartnerInfo {

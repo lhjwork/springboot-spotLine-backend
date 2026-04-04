@@ -2,12 +2,14 @@ package com.spotline.api.dto.request;
 
 import com.spotline.api.domain.enums.PartnerStatus;
 import com.spotline.api.domain.enums.PartnerTier;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.time.LocalDate;
 
 @Data
+@Schema(description = "파트너 수정 요청")
 public class UpdatePartnerRequest {
 
     private PartnerStatus status;

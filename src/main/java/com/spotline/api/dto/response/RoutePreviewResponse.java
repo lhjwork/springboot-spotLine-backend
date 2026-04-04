@@ -4,11 +4,13 @@ import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.RouteTheme;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.UUID;
 
+@Schema(description = "루트 미리보기 응답")
 @Data
 @Builder
 public class RoutePreviewResponse {

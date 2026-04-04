@@ -1,11 +1,13 @@
 package com.spotline.api.dto.response;
 
 import com.spotline.api.infrastructure.place.PlaceInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
+@Schema(description = "QR Discovery 응답")
 @Data
 @Builder
 public class DiscoverResponse {

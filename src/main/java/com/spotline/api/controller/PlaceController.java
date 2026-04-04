@@ -2,12 +2,15 @@ package com.spotline.api.controller;
 
 import com.spotline.api.infrastructure.place.PlaceApiService;
 import com.spotline.api.infrastructure.place.PlaceInfo;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "Place", description = "네이버/카카오 Place API 프록시 (24h 캐싱)")
 @RestController
 @RequestMapping("/api/v2/places")
 @RequiredArgsConstructor
@@ -15,9 +18,7 @@ public class PlaceController {
 
     private final PlaceApiService placeApiService;
 
-    /**
-     * Place API 검색 (크루 큐레이션 도구용)
-     */
+    @Operation(summary = "장소 검색 (네이버/카카오)")
     @GetMapping("/search")
     public ResponseEntity<List<PlaceInfo>> search(
             @RequestParam String query,
@@ -31,9 +32,7 @@ public class PlaceController {
         return ResponseEntity.ok(results);
     }
 
-    /**
-     * Place 상세 조회 (캐싱 적용, 24h TTL)
-     */
+    @Operation(summary = "장소 상세 조회")
     @GetMapping("/{provider}/{placeId}")
     public ResponseEntity<PlaceInfo> detail(
             @PathVariable String provider,

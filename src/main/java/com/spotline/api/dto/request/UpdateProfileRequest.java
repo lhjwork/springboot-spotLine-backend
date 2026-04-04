@@ -1,9 +1,11 @@
 package com.spotline.api.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
+@Schema(description = "프로필 수정 요청")
 public class UpdateProfileRequest {
 
     @Size(min = 1, max = 30, message = "닉네임은 1~30자여야 합니다")

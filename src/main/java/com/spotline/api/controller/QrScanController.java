@@ -1,10 +1,13 @@
 package com.spotline.api.controller;
 
 import com.spotline.api.service.PartnerService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@Tag(name = "QR", description = "QR 스캔 기록")
 @RestController
 @RequestMapping("/api/v2/qr")
 @RequiredArgsConstructor
@@ -12,7 +15,7 @@ public class QrScanController {
 
     private final PartnerService partnerService;
 
-    /** QR 스캔 로그 기록 — fire-and-forget, 항상 200 반환 */
+    @Operation(summary = "QR 스캔 기록")
     @PostMapping("/{qrId}/scan")
     public ResponseEntity<Void> recordScan(
             @PathVariable String qrId,

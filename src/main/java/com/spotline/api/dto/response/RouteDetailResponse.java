@@ -3,6 +3,7 @@ package com.spotline.api.dto.response;
 import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.entity.RouteSpot;
 import com.spotline.api.domain.enums.RouteTheme;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -10,6 +11,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "루트 상세 응답")
 @Data
 @Builder
 public class RouteDetailResponse {

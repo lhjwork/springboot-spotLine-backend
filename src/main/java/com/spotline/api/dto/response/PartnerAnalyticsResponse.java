@@ -1,5 +1,6 @@
 package com.spotline.api.dto.response;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -8,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "파트너 분석 응답")
 @Data
 @Builder
 public class PartnerAnalyticsResponse {

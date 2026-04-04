@@ -3,6 +3,7 @@ package com.spotline.api.dto.response;
 import com.spotline.api.domain.entity.Partner;
 import com.spotline.api.domain.enums.PartnerStatus;
 import com.spotline.api.domain.enums.PartnerTier;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "파트너 상세 응답")
 @Data
 @Builder
 public class PartnerResponse {

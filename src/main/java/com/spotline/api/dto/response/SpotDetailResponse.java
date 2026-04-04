@@ -5,6 +5,7 @@ import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
 import com.spotline.api.infrastructure.place.PlaceInfo;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+@Schema(description = "스팟 상세 응답")
 @Data
 @Builder
 public class SpotDetailResponse {

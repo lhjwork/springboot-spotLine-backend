@@ -1,11 +1,13 @@
 package com.spotline.api.dto.request;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
+@Schema(description = "S3 업로드 Presigned URL 요청")
 public class PresignedUrlRequest {
 
     @NotBlank(message = "파일명은 필수입니다")

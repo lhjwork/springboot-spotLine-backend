@@ -5,12 +5,14 @@ import com.spotline.api.domain.entity.ContentReport;
 import com.spotline.api.domain.enums.ModerationAction;
 import com.spotline.api.domain.enums.ReportReason;
 import com.spotline.api.domain.enums.ReportStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+@Schema(description = "신고 상세 응답")
 @Data
 @Builder
 public class ReportResponse {

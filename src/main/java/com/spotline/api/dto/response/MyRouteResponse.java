@@ -2,9 +2,11 @@ package com.spotline.api.dto.response;
 
 import com.spotline.api.domain.entity.Route;
 import com.spotline.api.domain.entity.UserRoute;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+@Schema(description = "내 루트 응답")
 @Data
 @Builder
 public class MyRouteResponse {

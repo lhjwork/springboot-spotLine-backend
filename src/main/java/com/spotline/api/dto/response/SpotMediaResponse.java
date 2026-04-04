@@ -2,11 +2,13 @@ package com.spotline.api.dto.response;
 
 import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.MediaType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.UUID;
 
+@Schema(description = "스팟 미디어 응답")
 @Data
 @Builder
 public class SpotMediaResponse {

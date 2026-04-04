@@ -9,6 +9,8 @@ import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.security.AuthUtil;
 import com.spotline.api.service.SpotService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.UUID;
 
+@Tag(name = "Spot", description = "스팟 CRUD + 탐색")
 @RestController
 @RequestMapping("/api/v2/spots")
 @RequiredArgsConstructor
@@ -30,6 +33,7 @@ public class SpotController {
     private final SpotService spotService;
     private final AuthUtil authUtil;
 
+    @Operation(summary = "QR Discovery — 현재 스팟 기반 추천")
     @GetMapping("/discover")
     public ResponseEntity<DiscoverResponse> discover(
             @RequestParam(required = false) Double lat,
@@ -43,17 +47,20 @@ public class SpotController {
         return ResponseEntity.ok(spotService.discover(lat, lng, radius, excludeSpotId));
     }
 
+    @Operation(summary = "스팟 상세 조회 (slug)")
     @GetMapping("/{slug}")
     public ResponseEntity<SpotDetailResponse> getBySlug(@PathVariable String slug) {
         return ResponseEntity.ok(spotService.getBySlug(slug));
     }
 
+    @Operation(summary = "스팟이 포함된 루트 목록")
     @GetMapping("/{spotId}/routes")
     public ResponseEntity<List<RoutePreviewResponse>> getRoutesBySpotId(
             @PathVariable UUID spotId) {
         return ResponseEntity.ok(spotService.findRoutesBySpotId(spotId));
     }
 
+    @Operation(summary = "스팟 목록 조회")
     @GetMapping
     public ResponseEntity<Page<SpotDetailResponse>> list(
             @RequestParam(required = false) String area,
@@ -65,6 +72,7 @@ public class SpotController {
         return ResponseEntity.ok(spotService.list(area, category, keyword, feedSort, pageable));
     }
 
+    @Operation(summary = "근처 스팟 조회")
     @GetMapping("/nearby")
     public ResponseEntity<List<SpotDetailResponse>> nearby(
             @RequestParam double lat,
@@ -73,6 +81,7 @@ public class SpotController {
         return ResponseEntity.ok(spotService.findNearby(lat, lng, radius));
     }
 
+    @Operation(summary = "스팟 생성")
     @PostMapping
     public ResponseEntity<SpotDetailResponse> create(@Valid @RequestBody CreateSpotRequest request) {
         String userId = authUtil.requireUserId();
@@ -80,6 +89,7 @@ public class SpotController {
                 .body(spotService.create(request, userId, "user"));
     }
 
+    @Operation(summary = "스팟 수정")
     @PutMapping("/{slug}")
     public ResponseEntity<SpotDetailResponse> update(
             @PathVariable String slug,
@@ -87,17 +97,20 @@ public class SpotController {
         return ResponseEntity.ok(spotService.update(slug, request, authUtil.requireUserId()));
     }
 
+    @Operation(summary = "스팟 삭제")
     @DeleteMapping("/{slug}")
     public ResponseEntity<Void> delete(@PathVariable String slug) {
         spotService.delete(slug, authUtil.requireUserId());
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "전체 스팟 slug 목록 (SSR/sitemap)")
     @GetMapping("/slugs")
     public ResponseEntity<List<SlugResponse>> slugs() {
         return ResponseEntity.ok(spotService.getAllSlugs());
     }
 
+    @Operation(summary = "스팟 대량 생성 (최대 50개)")
     @PostMapping("/bulk")
     public ResponseEntity<List<SpotDetailResponse>> bulkCreate(
             @Valid @RequestBody @Size(max = 50, message = "한 번에 최대 50개까지 등록 가능합니다") List<CreateSpotRequest> requests) {

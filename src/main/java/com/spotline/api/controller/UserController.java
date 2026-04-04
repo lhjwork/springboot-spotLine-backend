@@ -14,6 +14,8 @@ import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.*;
 import com.spotline.api.security.AuthUtil;
 import com.spotline.api.service.UserProfileService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+@Tag(name = "User", description = "사용자 프로필 + 내 컨텐츠")
 @RestController
 @RequestMapping("/api/v2/users")
 @RequiredArgsConstructor
@@ -37,12 +40,14 @@ public class UserController {
     private final RouteRepository routeRepository;
     private final UserProfileService userProfileService;
 
+    @Operation(summary = "내 프로필 수정")
     @PutMapping("/me/profile")
     public UserProfileResponse updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return userProfileService.updateProfile(
             authUtil.requireUserId(), authUtil.getCurrentEmail(), request);
     }
 
+    @Operation(summary = "아바타 업로드")
     @PostMapping("/me/avatar")
     public AvatarUploadResponse uploadAvatar(@Valid @RequestBody AvatarUploadRequest request) {
         return userProfileService.generateAvatarUploadUrl(
@@ -50,12 +55,14 @@ public class UserController {
             request.getFilename(), request.getContentType());
     }
 
+    @Operation(summary = "아바타 삭제")
     @DeleteMapping("/me/avatar")
     public UserProfileResponse deleteAvatar() {
         return userProfileService.deleteAvatar(
             authUtil.requireUserId(), authUtil.getCurrentEmail());
     }
 
+    @Operation(summary = "내가 생성한 스팟")
     @GetMapping("/me/spots")
     public SimplePageResponse<SpotDetailResponse> getMySpots(
             @RequestParam(defaultValue = "0") int page,
@@ -69,6 +76,7 @@ public class UserController {
         );
     }
 
+    @Operation(summary = "내가 생성한 루트")
     @GetMapping("/me/routes-created")
     public SimplePageResponse<RoutePreviewResponse> getMyCreatedRoutes(
             @RequestParam(defaultValue = "0") int page,
@@ -82,6 +90,7 @@ public class UserController {
         );
     }
 
+    @Operation(summary = "사용자 프로필 조회")
     @GetMapping("/{userId}/profile")
     public UserProfileResponse getProfile(@PathVariable String userId) {
         User user = userRepository.findById(userId)
@@ -89,6 +98,7 @@ public class UserController {
         return UserProfileResponse.from(user, 0, 0);
     }
 
+    @Operation(summary = "사용자 좋아요 스팟")
     @GetMapping("/{userId}/likes/spots")
     public Page<SpotDetailResponse> getLikedSpots(
             @PathVariable String userId,
@@ -98,6 +108,7 @@ public class UserController {
             .map(sl -> SpotDetailResponse.from(sl.getSpot(), null));
     }
 
+    @Operation(summary = "사용자 저장 루트")
     @GetMapping("/{userId}/saves/routes")
     public Page<RoutePreviewResponse> getSavedRoutes(
             @PathVariable String userId,
@@ -107,6 +118,7 @@ public class UserController {
             .map(rs -> RoutePreviewResponse.from(rs.getRoute()));
     }
 
+    @Operation(summary = "내 저장 목록")
     @GetMapping("/me/saves")
     public SimplePageResponse<?> getMySaves(
             @RequestParam String type,

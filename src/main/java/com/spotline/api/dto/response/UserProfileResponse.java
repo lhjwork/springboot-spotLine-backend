@@ -1,9 +1,11 @@
 package com.spotline.api.dto.response;
 
 import com.spotline.api.domain.entity.User;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
 import lombok.Data;
 
+@Schema(description = "사용자 프로필 응답")
 @Data
 @Builder
 public class UserProfileResponse {

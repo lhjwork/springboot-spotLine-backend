@@ -1,6 +1,7 @@
 package com.spotline.api.dto.request;
 
 import com.spotline.api.domain.enums.CommentTargetType;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,6 +10,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
+@Schema(description = "댓글 작성 요청")
 public class CreateCommentRequest {
 
     @NotNull(message = "대상 타입은 필수입니다")
