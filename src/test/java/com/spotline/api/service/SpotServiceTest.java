@@ -3,7 +3,7 @@ package com.spotline.api.service;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
@@ -43,7 +43,7 @@ class SpotServiceTest {
     @Mock
     private SpotRepository spotRepository;
     @Mock
-    private RouteRepository routeRepository;
+    private SpotLineRepository spotLineRepository;
     @Mock
     private PlaceApiService placeApiService;
     @Mock
