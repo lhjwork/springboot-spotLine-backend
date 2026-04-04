@@ -4,7 +4,7 @@ import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
 import com.spotline.api.dto.response.DiscoverResponse;
-import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.dto.response.SpotLinePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.security.AuthUtil;
@@ -53,11 +53,11 @@ public class SpotController {
         return ResponseEntity.ok(spotService.getBySlug(slug));
     }
 
-    @Operation(summary = "스팟이 포함된 루트 목록")
-    @GetMapping("/{spotId}/routes")
-    public ResponseEntity<List<RoutePreviewResponse>> getRoutesBySpotId(
+    @Operation(summary = "스팟이 포함된 SpotLine 목록")
+    @GetMapping("/{spotId}/spotlines")
+    public ResponseEntity<List<SpotLinePreviewResponse>> getRoutesBySpotId(
             @PathVariable UUID spotId) {
-        return ResponseEntity.ok(spotService.findRoutesBySpotId(spotId));
+        return ResponseEntity.ok(spotService.findSpotLinesBySpotId(spotId));
     }
 
     @Operation(summary = "스팟 목록 조회")

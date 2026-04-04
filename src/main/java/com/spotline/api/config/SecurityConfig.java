@@ -29,7 +29,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // Public — 읽기 전용
                         .requestMatchers(HttpMethod.GET, "/api/v2/spots/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v2/routes/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v2/spotlines/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/places/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/users/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v2/comments/**").permitAll()
@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         // Public — QR 스캔 로그 + 조회수 증가 (POST이지만 인증 불필요)
                         .requestMatchers(HttpMethod.POST, "/api/v2/qr/*/scan").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v2/spots/*/view", "/api/v2/routes/*/view").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v2/spots/*/view", "/api/v2/spotlines/*/view").permitAll()
                         // Admin 전용 — ROLE_ADMIN 필요
                         .requestMatchers("/api/v2/admin/**").hasRole("ADMIN")
                         // 인증 필요 — 쓰기 작업

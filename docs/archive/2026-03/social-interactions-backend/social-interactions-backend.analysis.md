@@ -87,8 +87,8 @@ Design document (Section 7: 20 implementation items) vs actual Java source code 
 |--------|-------|:----------------:|:-------------------:|:--------------:|:-----------------:|:------:|
 | SpotLike | spot_likes | ✅ (user_id, spot_id) | ✅ | ✅ Spot | ✅ | ✅ |
 | SpotSave | spot_saves | ✅ (user_id, spot_id) | ✅ | ✅ Spot | ✅ | ✅ |
-| RouteLike | route_likes | ✅ (user_id, route_id) | ✅ | ✅ Route | ✅ | ✅ |
-| RouteSave | route_saves | ✅ (user_id, route_id) | ✅ | ✅ Route | ✅ | ✅ |
+| RouteLike | spotline_likes | ✅ (user_id, route_id) | ✅ | ✅ Route | ✅ | ✅ |
+| RouteSave | spotline_saves | ✅ (user_id, route_id) | ✅ | ✅ Route | ✅ | ✅ |
 
 **Verdict**: ✅ All 4 entities exact match
 
@@ -112,7 +112,7 @@ Design document (Section 7: 20 implementation items) vs actual Java source code 
 
 | Aspect | Status | Notes |
 |--------|:------:|-------|
-| `@Table(name="user_routes")` with `@Index` | ✅ | idx_user_routes_user_id |
+| `@Table(name="user_spotlines")` with `@Index` | ✅ | idx_user_spotlines_user_id |
 | ManyToOne Route (LAZY) | ✅ | |
 | scheduledDate (String) | ✅ | |
 | status `@Builder.Default = "scheduled"` | ✅ | |
@@ -140,7 +140,7 @@ Design document (Section 7: 20 implementation items) vs actual Java source code 
 
 **FollowStatusResponse deviation**: Same pattern -- field `boolean following` with `@JsonProperty("isFollowing")`. JSON output matches design spec.
 
-**MyRouteResponse improvement**: Adds null-safety checks (`route.getSpots() != null`, `ur.getCompletedAt() != null`, `ur.getCreatedAt() != null`). Also improves parentRouteId by checking `route.getParentRoute()` instead of always using `route.getId()`.
+**MyRouteResponse improvement**: Adds null-safety checks (`route.getSpots() != null`, `ur.getCompletedAt() != null`, `ur.getCreatedAt() != null`). Also improves parentSpotLineId by checking `route.getParentRoute()` instead of always using `route.getId()`.
 
 **Verdict**: ✅ 7/7 DTOs match (2 use @JsonProperty for correct serialization -- functionally equivalent)
 
@@ -244,7 +244,7 @@ Design document (Section 7: 20 implementation items) vs actual Java source code 
 
 | Method | Design | Implementation | Status |
 |--------|--------|---------------|:------:|
-| replicate(userId, routeId, scheduledDate) | ✅ | ✅ | ✅ |
+| replicate(userId, spotLineId, scheduledDate) | ✅ | ✅ | ✅ |
 | getMyRoutes(userId, status, pageable) | ✅ | ✅ | ✅ |
 | updateStatus(userId, myRouteId, status) | ✅ | ✅ | ✅ |
 | delete(userId, myRouteId) | ✅ | ✅ | ✅ |
@@ -261,11 +261,11 @@ Design document (Section 7: 20 implementation items) vs actual Java source code 
 
 | Endpoint | Method | Design | Implementation | Status |
 |----------|--------|--------|---------------|:------:|
-| /api/v2/routes/{routeId}/replicate | POST | ✅ | ✅ | ✅ |
+| /api/v2/routes/{spotLineId}/replicate | POST | ✅ | ✅ | ✅ |
 | /api/v2/users/me/routes | GET | ✅ | ✅ | ✅ |
 | /api/v2/users/me/routes/{myRouteId} | PATCH | ✅ | ✅ | ✅ |
 | /api/v2/users/me/routes/{myRouteId} | DELETE | ✅ | ✅ | ✅ |
-| /api/v2/routes/{routeId}/variations | GET | ✅ | ✅ | ✅ |
+| /api/v2/routes/{spotLineId}/variations | GET | ✅ | ✅ | ✅ |
 
 **Improvement**: DELETE endpoint adds `@ResponseStatus(HttpStatus.NO_CONTENT)` for proper 204 response (design returns void with default 200).
 
@@ -323,7 +323,7 @@ None.
 |------|--------|----------------|--------|
 | SocialStatusResponse field naming | `boolean isLiked` | `boolean liked` + `@JsonProperty("isLiked")` | None (JSON output identical) |
 | FollowStatusResponse field naming | `boolean isFollowing` | `boolean following` + `@JsonProperty("isFollowing")` | None (JSON output identical) |
-| MyRouteResponse.parentRouteId | Always `route.getId()` | Checks `route.getParentRoute()` first | Low (more correct) |
+| MyRouteResponse.parentSpotLineId | Always `route.getId()` | Checks `route.getParentRoute()` first | Low (more correct) |
 | FollowController dependencies | Injects UserSyncService | Omits unused UserSyncService | None (cleaner) |
 | UserController dependencies | Injects SocialService | Omits unused SocialService | None (cleaner) |
 
@@ -381,7 +381,7 @@ Missing: 0
 +---------------------------------------------+
 ```
 
-Match rate is 97% rather than 100% due to 5 minor deviations from the design spec (field naming strategy, dependency cleanup, parentRouteId logic). All deviations are improvements or functionally equivalent.
+Match rate is 97% rather than 100% due to 5 minor deviations from the design spec (field naming strategy, dependency cleanup, parentSpotLineId logic). All deviations are improvements or functionally equivalent.
 
 ---
 
@@ -392,7 +392,7 @@ Match rate is 97% rather than 100% due to 5 minor deviations from the design spe
 1. Update design doc SocialStatusResponse/FollowStatusResponse to show `@JsonProperty` approach for `is*` boolean fields
 2. Note `getCurrentEmail()` addition in AuthUtil design section
 3. Note `@Transactional(readOnly = true)` pattern in service design sections
-4. Update MyRouteResponse.parentRouteId to reflect the parentRoute-aware logic
+4. Update MyRouteResponse.parentSpotLineId to reflect the parentRoute-aware logic
 
 ### No Immediate Code Changes Required
 

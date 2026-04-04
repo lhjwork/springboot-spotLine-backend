@@ -24,8 +24,8 @@ src/main/java/com/spotline/api/
 ├── controller/          — REST API 컨트롤러
 ├── service/             — 비즈니스 로직
 ├── domain/
-│   ├── entity/          — JPA 엔티티 (Spot, Route, RouteSpot)
-│   ├── enums/           — Enum 타입 (SpotCategory, RouteTheme 등)
+│   ├── entity/          — JPA 엔티티 (Spot, SpotLine, SpotLineSpot, SpotLine)
+│   ├── enums/           — Enum 타입 (SpotCategory, SpotLineTheme 등)
 │   └── repository/      — Spring Data JPA Repository
 ├── dto/
 │   ├── request/         — API 요청 DTO
@@ -40,7 +40,7 @@ src/main/java/com/spotline/api/
 `Controller → Service → Repository (+ PlaceApiService)` 순서로 흐른다.
 
 ## API Versioning
-- `/api/v2/*` — 신규 Spot/Route/Place API
+- `/api/v2/*` — 신규 Spot/SpotLine/Place API
 - 기존 Express `/api/*`는 backend-spotLine에서 유지 (점진적 마이그레이션)
 
 ## Key Conventions

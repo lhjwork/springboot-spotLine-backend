@@ -19,7 +19,7 @@ public class OpenApiConfig {
         return new OpenAPI()
             .info(new Info()
                 .title("Spotline API")
-                .description("Experience Based Social Platform — Spot/Route/Place/Social/QR API")
+                .description("Experience Based Social Platform — Spot/SpotLine/Place/Social/QR API")
                 .version("2.0")
                 .contact(new Contact().name("Spotline Team")))
             .addSecurityItem(new SecurityRequirement().addList(securitySchemeName))

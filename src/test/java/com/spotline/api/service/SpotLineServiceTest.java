@@ -1,15 +1,15 @@
 package com.spotline.api.service;
 
-import com.spotline.api.domain.entity.Route;
+import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.Spot;
-import com.spotline.api.domain.enums.RouteTheme;
+import com.spotline.api.domain.enums.SpotLineTheme;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.infrastructure.s3.S3Service;
-import com.spotline.api.dto.request.CreateRouteRequest;
-import com.spotline.api.dto.response.RouteDetailResponse;
+import com.spotline.api.dto.request.CreateSpotLineRequest;
+import com.spotline.api.dto.response.SpotLineDetailResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -31,16 +31,16 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
 
 @ExtendWith(MockitoExtension.class)
-class RouteServiceTest {
+class SpotLineServiceTest {
 
     @Mock
-    private RouteRepository routeRepository;
+    private SpotLineRepository spotLineRepository;
     @Mock
     private SpotRepository spotRepository;
     @Mock
     private S3Service s3Service;
     @InjectMocks
-    private RouteService routeService;
+    private SpotLineService spotLineService;
 
     private Spot spot1;
     private Spot spot2;
@@ -101,15 +101,15 @@ class RouteServiceTest {
     }
 
     @Test
-    @DisplayName("Route 생성 시 Spot 참조 및 순서 설정")
+    @DisplayName("SpotLine 생성 시 Spot 참조 및 순서 설정")
     void create_setsSpotReferencesAndOrder() {
-        CreateRouteRequest request = new CreateRouteRequest();
+        CreateSpotLineRequest request = new CreateSpotLineRequest();
         request.setTitle("성수 데이트 코스");
-        request.setTheme(RouteTheme.DATE);
+        request.setTheme(SpotLineTheme.DATE);
         request.setArea("성수");
         request.setCreatorName("Crew");
 
-        CreateRouteRequest.RouteSpotRequest sr1 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr1 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr1.setSpotId(spot1.getId());
         sr1.setOrder(1);
         sr1.setStayDuration(60);
@@ -117,31 +117,31 @@ class RouteServiceTest {
         sr1.setDistanceToNext(800);
         sr1.setTransitionNote("골목길로 10분");
 
-        CreateRouteRequest.RouteSpotRequest sr2 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr2 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr2.setSpotId(spot2.getId());
         sr2.setOrder(2);
         sr2.setStayDuration(90);
         sr2.setWalkingTimeToNext(5);
         sr2.setDistanceToNext(400);
 
-        CreateRouteRequest.RouteSpotRequest sr3 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr3 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr3.setSpotId(spot3.getId());
         sr3.setOrder(3);
         sr3.setStayDuration(60);
 
         request.setSpots(List.of(sr1, sr2, sr3));
 
-        given(routeRepository.existsBySlug(anyString())).willReturn(false);
+        given(spotLineRepository.existsBySlug(anyString())).willReturn(false);
         given(spotRepository.findById(spot1.getId())).willReturn(Optional.of(spot1));
         given(spotRepository.findById(spot2.getId())).willReturn(Optional.of(spot2));
         given(spotRepository.findById(spot3.getId())).willReturn(Optional.of(spot3));
-        given(routeRepository.save(any(Route.class))).willAnswer(inv -> {
-            Route r = inv.getArgument(0);
-            r.setId(UUID.randomUUID());
-            return r;
+        given(spotLineRepository.save(any(SpotLine.class))).willAnswer(inv -> {
+            SpotLine sl = inv.getArgument(0);
+            sl.setId(UUID.randomUUID());
+            return sl;
         });
 
-        Route result = routeService.create(request, null, "crew");
+        SpotLine result = spotLineService.create(request, null, "crew");
 
         assertThat(result.getSpots()).hasSize(3);
         assertThat(result.getSpots().get(0).getSpotOrder()).isEqualTo(1);
@@ -151,44 +151,44 @@ class RouteServiceTest {
     }
 
     @Test
-    @DisplayName("Route 생성 시 totalDuration 자동 계산 (stayDuration + walkingTimeToNext)")
+    @DisplayName("SpotLine 생성 시 totalDuration 자동 계산 (stayDuration + walkingTimeToNext)")
     void create_calculatesTotalDuration() {
-        CreateRouteRequest request = new CreateRouteRequest();
+        CreateSpotLineRequest request = new CreateSpotLineRequest();
         request.setTitle("성수 산책 코스");
-        request.setTheme(RouteTheme.WALK);
+        request.setTheme(SpotLineTheme.WALK);
         request.setArea("성수");
         request.setCreatorName("Crew");
 
-        CreateRouteRequest.RouteSpotRequest sr1 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr1 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr1.setSpotId(spot1.getId());
         sr1.setStayDuration(60);
         sr1.setWalkingTimeToNext(10);
         sr1.setDistanceToNext(800);
 
-        CreateRouteRequest.RouteSpotRequest sr2 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr2 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr2.setSpotId(spot2.getId());
         sr2.setStayDuration(90);
         sr2.setWalkingTimeToNext(5);
         sr2.setDistanceToNext(400);
 
-        CreateRouteRequest.RouteSpotRequest sr3 = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr3 = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr3.setSpotId(spot3.getId());
         sr3.setStayDuration(45);
         // 마지막 Spot은 walkingTimeToNext 없음
 
         request.setSpots(List.of(sr1, sr2, sr3));
 
-        given(routeRepository.existsBySlug(anyString())).willReturn(false);
+        given(spotLineRepository.existsBySlug(anyString())).willReturn(false);
         given(spotRepository.findById(spot1.getId())).willReturn(Optional.of(spot1));
         given(spotRepository.findById(spot2.getId())).willReturn(Optional.of(spot2));
         given(spotRepository.findById(spot3.getId())).willReturn(Optional.of(spot3));
-        given(routeRepository.save(any(Route.class))).willAnswer(inv -> {
-            Route r = inv.getArgument(0);
-            r.setId(UUID.randomUUID());
-            return r;
+        given(spotLineRepository.save(any(SpotLine.class))).willAnswer(inv -> {
+            SpotLine sl = inv.getArgument(0);
+            sl.setId(UUID.randomUUID());
+            return sl;
         });
 
-        Route result = routeService.create(request, null, "crew");
+        SpotLine result = spotLineService.create(request, null, "crew");
 
         // totalDuration = 60 + 10 + 90 + 5 + 45 = 210
         assertThat(result.getTotalDuration()).isEqualTo(210);
@@ -197,34 +197,34 @@ class RouteServiceTest {
     }
 
     @Test
-    @DisplayName("Route 생성 시 존재하지 않는 Spot ID면 ResourceNotFoundException")
+    @DisplayName("SpotLine 생성 시 존재하지 않는 Spot ID면 ResourceNotFoundException")
     void create_invalidSpotId_throwsException() {
         UUID invalidId = UUID.randomUUID();
-        CreateRouteRequest request = new CreateRouteRequest();
+        CreateSpotLineRequest request = new CreateSpotLineRequest();
         request.setTitle("테스트 코스");
-        request.setTheme(RouteTheme.HANGOUT);
+        request.setTheme(SpotLineTheme.HANGOUT);
         request.setArea("성수");
 
-        CreateRouteRequest.RouteSpotRequest sr = new CreateRouteRequest.RouteSpotRequest();
+        CreateSpotLineRequest.SpotLineSpotRequest sr = new CreateSpotLineRequest.SpotLineSpotRequest();
         sr.setSpotId(invalidId);
         request.setSpots(List.of(sr));
 
-        given(routeRepository.existsBySlug(anyString())).willReturn(false);
+        given(spotLineRepository.existsBySlug(anyString())).willReturn(false);
         given(spotRepository.findById(invalidId)).willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> routeService.create(request, null, "crew"))
+        assertThatThrownBy(() -> spotLineService.create(request, null, "crew"))
                 .isInstanceOf(ResourceNotFoundException.class)
                 .hasMessageContaining("Spot");
     }
 
     @Test
-    @DisplayName("slug로 Route 상세 조회")
-    void getDetailBySlug_returnsRouteDetail() {
-        Route route = Route.builder()
+    @DisplayName("slug로 SpotLine 상세 조회")
+    void getDetailBySlug_returnsSpotLineDetail() {
+        SpotLine spotLine = SpotLine.builder()
                 .id(UUID.randomUUID())
                 .slug("seongsu-date")
                 .title("성수 데이트 코스")
-                .theme(RouteTheme.DATE)
+                .theme(SpotLineTheme.DATE)
                 .area("성수")
                 .totalDuration(210)
                 .totalDistance(1200)
@@ -239,25 +239,25 @@ class RouteServiceTest {
                 .isActive(true)
                 .build();
 
-        given(routeRepository.findBySlugAndIsActiveTrue("seongsu-date"))
-                .willReturn(Optional.of(route));
+        given(spotLineRepository.findBySlugAndIsActiveTrue("seongsu-date"))
+                .willReturn(Optional.of(spotLine));
 
-        RouteDetailResponse result = routeService.getDetailBySlug("seongsu-date");
+        SpotLineDetailResponse result = spotLineService.getDetailBySlug("seongsu-date");
 
         assertThat(result.getSlug()).isEqualTo("seongsu-date");
         assertThat(result.getTotalDuration()).isEqualTo(210);
         assertThat(result.getTotalDistance()).isEqualTo(1200);
-        assertThat(result.getTheme()).isEqualTo(RouteTheme.DATE);
+        assertThat(result.getTheme()).isEqualTo(SpotLineTheme.DATE);
     }
 
     @Test
-    @DisplayName("존재하지 않는 Route slug 조회 시 ResourceNotFoundException")
+    @DisplayName("존재하지 않는 SpotLine slug 조회 시 ResourceNotFoundException")
     void getBySlug_notFound_throwsException() {
-        given(routeRepository.findBySlugAndIsActiveTrue("invalid"))
+        given(spotLineRepository.findBySlugAndIsActiveTrue("invalid"))
                 .willReturn(Optional.empty());
 
-        assertThatThrownBy(() -> routeService.getBySlug("invalid"))
+        assertThatThrownBy(() -> spotLineService.getBySlug("invalid"))
                 .isInstanceOf(ResourceNotFoundException.class)
-                .hasMessageContaining("Route");
+                .hasMessageContaining("SpotLine");
     }
 }

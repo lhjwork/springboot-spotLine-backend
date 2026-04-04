@@ -32,16 +32,16 @@ public class SocialController {
         return socialService.toggleSpotSave(authUtil.requireUserId(), id);
     }
 
-    @Operation(summary = "루트 좋아요 토글")
-    @PostMapping("/routes/{id}/like")
-    public SocialToggleResponse toggleRouteLike(@PathVariable UUID id) {
-        return socialService.toggleRouteLike(authUtil.requireUserId(), id);
+    @Operation(summary = "SpotLine 좋아요 토글")
+    @PostMapping("/spotlines/{id}/like")
+    public SocialToggleResponse toggleSpotLineLike(@PathVariable UUID id) {
+        return socialService.toggleSpotLineLike(authUtil.requireUserId(), id);
     }
 
-    @Operation(summary = "루트 저장 토글")
-    @PostMapping("/routes/{id}/save")
-    public SocialToggleResponse toggleRouteSave(@PathVariable UUID id) {
-        return socialService.toggleRouteSave(authUtil.requireUserId(), id);
+    @Operation(summary = "SpotLine 저장 토글")
+    @PostMapping("/spotlines/{id}/save")
+    public SocialToggleResponse toggleSpotLineSave(@PathVariable UUID id) {
+        return socialService.toggleSpotLineSave(authUtil.requireUserId(), id);
     }
 
     @Operation(summary = "스팟 소셜 상태 조회")
@@ -52,11 +52,11 @@ public class SocialController {
         return socialService.getSpotSocialStatus(userId, id);
     }
 
-    @Operation(summary = "루트 소셜 상태 조회")
-    @GetMapping("/routes/{id}/social")
-    public SocialStatusResponse getRouteSocial(@PathVariable UUID id) {
+    @Operation(summary = "SpotLine 소셜 상태 조회")
+    @GetMapping("/spotlines/{id}/social")
+    public SocialStatusResponse getSpotLineSocial(@PathVariable UUID id) {
         String userId = authUtil.getCurrentUserId();
         if (userId == null) return new SocialStatusResponse(false, false);
-        return socialService.getRouteSocialStatus(userId, id);
+        return socialService.getSpotLineSocialStatus(userId, id);
     }
 }

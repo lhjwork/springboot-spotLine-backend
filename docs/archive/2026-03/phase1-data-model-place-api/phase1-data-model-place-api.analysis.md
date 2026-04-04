@@ -87,9 +87,9 @@ Extra fields (beneficial): `sido`, `sigungu`, `dong`, `blogUrl`, `instagramUrl`,
 
 #### 3.2.2 Route Entity -- All design fields present
 
-All fields matched: id, slug, title, description, theme, area, totalDuration, totalDistance, spots(OneToMany RouteSpot), likesCount, savesCount, replicationsCount, completionsCount, creatorType, creatorId, creatorName, parentRoute(ManyToOne self), variations(OneToMany self), isActive, timestamps.
+All fields matched: id, slug, title, description, theme, area, totalDuration, totalDistance, spots(OneToMany SpotLineSpot), likesCount, savesCount, replicationsCount, completionsCount, creatorType, creatorId, creatorName, parentRoute(ManyToOne self), variations(OneToMany self), isActive, timestamps.
 
-#### 3.2.3 RouteSpot Entity -- All design fields present
+#### 3.2.3 SpotLineSpot Entity -- All design fields present
 
 All fields matched: id, route(ManyToOne), spot(ManyToOne), spotOrder, suggestedTime, stayDuration, walkingTimeToNext, distanceToNext, transitionNote.
 
@@ -112,8 +112,8 @@ All fields matched: id, route(ManyToOne), spot(ManyToOne), spotOrder, suggestedT
 | idx_route_theme | `@Index` on Route.java L18 | ✅ |
 | idx_route_active | `@Index` on Route.java L19 | ✅ |
 | idx_route_parent | `@Index` on Route.java L20 | ✅ (NEW - was missing in v0.1) |
-| idx_route_spot_route | `@Index` on RouteSpot entity | ✅ |
-| idx_route_spot_spot | `@Index` on RouteSpot entity | ✅ |
+| idx_route_spot_route | `@Index` on SpotLineSpot entity | ✅ |
+| idx_route_spot_spot | `@Index` on SpotLineSpot entity | ✅ |
 
 Extra indexes (beneficial): `idx_spot_sigungu`, `idx_spot_sido`
 

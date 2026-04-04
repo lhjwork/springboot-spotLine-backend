@@ -15,7 +15,7 @@ public class DiscoverResponse {
     private CurrentSpotInfo currentSpot;
     private NextSpotInfo nextSpot;
     private List<SpotDetailResponse> nearbySpots;
-    private List<RoutePreviewResponse> popularRoutes;
+    private List<SpotLinePreviewResponse> popularSpotLines;
     private String area;
     private boolean locationGranted;
 

@@ -6,24 +6,24 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "route_spots", indexes = {
-        @Index(name = "idx_route_spot_route", columnList = "route_id"),
-        @Index(name = "idx_route_spot_spot", columnList = "spot_id")
+@Table(name = "spotline_spots", indexes = {
+        @Index(name = "idx_spotline_spot_spotline", columnList = "spotline_id"),
+        @Index(name = "idx_spotline_spot_spot", columnList = "spot_id")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RouteSpot {
+public class SpotLineSpot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "route_id", nullable = false)
-    private Route route;
+    @JoinColumn(name = "spotline_id", nullable = false)
+    private SpotLine spotLine;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spot_id", nullable = false)

@@ -1,10 +1,10 @@
 package com.spotline.api.service;
 
-import com.spotline.api.domain.entity.Route;
+import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.repository.CommentRepository;
 import com.spotline.api.domain.repository.ContentReportRepository;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.response.DailyContentTrendResponse;
 import com.spotline.api.dto.response.PlatformStatsResponse;
@@ -24,18 +24,18 @@ import java.util.*;
 public class AnalyticsService {
 
     private final SpotRepository spotRepository;
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
     private final CommentRepository commentRepository;
     private final ContentReportRepository contentReportRepository;
 
     public PlatformStatsResponse getPlatformStats() {
         return PlatformStatsResponse.builder()
                 .totalSpots(spotRepository.countByIsActiveTrue())
-                .totalRoutes(routeRepository.countByIsActiveTrue())
+                .totalSpotLines(spotLineRepository.countByIsActiveTrue())
                 .totalComments(commentRepository.count())
                 .totalReports(contentReportRepository.count())
                 .totalSpotViews(spotRepository.sumViewsCountByIsActiveTrue())
-                .totalRouteViews(routeRepository.sumViewsCountByIsActiveTrue())
+                .totalSpotLineViews(spotLineRepository.sumViewsCountByIsActiveTrue())
                 .build();
     }
 
@@ -53,8 +53,8 @@ public class AnalyticsService {
                 .toList();
     }
 
-    public List<PopularContentResponse> getPopularRoutes() {
-        return routeRepository.findTop10ByIsActiveTrueOrderByViewsCountDesc()
+    public List<PopularContentResponse> getPopularSpotLines() {
+        return spotLineRepository.findTop10ByIsActiveTrueOrderByViewsCountDesc()
                 .stream()
                 .map(r -> PopularContentResponse.builder()
                         .id(r.getId())
@@ -70,7 +70,7 @@ public class AnalyticsService {
     public List<DailyContentTrendResponse> getDailyTrend(int days) {
         LocalDateTime since = LocalDateTime.now().minusDays(days);
         Map<LocalDate, Long> spotMap = toDateMap(spotRepository.countDailyCreatedSince(since));
-        Map<LocalDate, Long> routeMap = toDateMap(routeRepository.countDailyCreatedSince(since));
+        Map<LocalDate, Long> spotLineMap = toDateMap(spotLineRepository.countDailyCreatedSince(since));
 
         List<DailyContentTrendResponse> result = new ArrayList<>();
         for (int i = days - 1; i >= 0; i--) {
@@ -78,7 +78,7 @@ public class AnalyticsService {
             result.add(DailyContentTrendResponse.builder()
                     .date(date)
                     .spotCount(spotMap.getOrDefault(date, 0L))
-                    .routeCount(routeMap.getOrDefault(date, 0L))
+                    .spotLineCount(spotLineMap.getOrDefault(date, 0L))
                     .build());
         }
         return result;
@@ -93,11 +93,11 @@ public class AnalyticsService {
     }
 
     @Transactional
-    public void incrementRouteView(UUID routeId) {
-        Route route = routeRepository.findById(routeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Route", routeId.toString()));
-        route.setViewsCount(route.getViewsCount() + 1);
-        routeRepository.save(route);
+    public void incrementSpotLineView(UUID routeId) {
+        SpotLine spotLine = spotLineRepository.findById(routeId)
+                .orElseThrow(() -> new ResourceNotFoundException("SpotLine", routeId.toString()));
+        spotLine.setViewsCount(spotLine.getViewsCount() + 1);
+        spotLineRepository.save(spotLine);
     }
 
     private Map<LocalDate, Long> toDateMap(List<Object[]> rows) {

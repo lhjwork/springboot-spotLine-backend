@@ -1,10 +1,10 @@
 package com.spotline.api.controller;
 
 import com.spotline.api.domain.entity.Spot;
-import com.spotline.api.domain.entity.Route;
+import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.User;
-import com.spotline.api.domain.repository.RouteRepository;
-import com.spotline.api.domain.repository.RouteSaveRepository;
+import com.spotline.api.domain.repository.SpotLineRepository;
+import com.spotline.api.domain.repository.SpotLineSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.domain.repository.SpotSaveRepository;
@@ -35,9 +35,9 @@ public class UserController {
     private final AuthUtil authUtil;
     private final SpotLikeRepository spotLikeRepository;
     private final SpotSaveRepository spotSaveRepository;
-    private final RouteSaveRepository routeSaveRepository;
+    private final SpotLineSaveRepository spotLineSaveRepository;
     private final SpotRepository spotRepository;
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
     private final UserProfileService userProfileService;
 
     @Operation(summary = "내 프로필 수정")
@@ -76,17 +76,17 @@ public class UserController {
         );
     }
 
-    @Operation(summary = "내가 생성한 루트")
-    @GetMapping("/me/routes-created")
-    public SimplePageResponse<RoutePreviewResponse> getMyCreatedRoutes(
+    @Operation(summary = "내가 생성한 SpotLine")
+    @GetMapping("/me/spotlines-created")
+    public SimplePageResponse<SpotLinePreviewResponse> getMyCreatedSpotLines(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         String userId = authUtil.requireUserId();
-        Page<Route> routes = routeRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
+        Page<SpotLine> spotLines = spotLineRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
             userId, PageRequest.of(page, size));
         return new SimplePageResponse<>(
-            routes.getContent().stream().map(RoutePreviewResponse::from).toList(),
-            routes.hasNext()
+            spotLines.getContent().stream().map(SpotLinePreviewResponse::from).toList(),
+            spotLines.hasNext()
         );
     }
 
@@ -108,14 +108,14 @@ public class UserController {
             .map(sl -> SpotDetailResponse.from(sl.getSpot(), null));
     }
 
-    @Operation(summary = "사용자 저장 루트")
-    @GetMapping("/{userId}/saves/routes")
-    public Page<RoutePreviewResponse> getSavedRoutes(
+    @Operation(summary = "사용자 저장 SpotLine")
+    @GetMapping("/{userId}/saves/spotlines")
+    public Page<SpotLinePreviewResponse> getSavedSpotLines(
             @PathVariable String userId,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
-        return routeSaveRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
-            .map(rs -> RoutePreviewResponse.from(rs.getRoute()));
+        return spotLineSaveRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
+            .map(rs -> SpotLinePreviewResponse.from(rs.getSpotLine()));
     }
 
     @Operation(summary = "내 저장 목록")
@@ -134,10 +134,10 @@ public class UserController {
                 saves.hasNext()
             );
         } else {
-            var saves = routeSaveRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
+            var saves = spotLineSaveRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
             return new SimplePageResponse<>(
                 saves.getContent().stream()
-                    .map(s -> RoutePreviewResponse.from(s.getRoute())).toList(),
+                    .map(s -> SpotLinePreviewResponse.from(s.getSpotLine())).toList(),
                 saves.hasNext()
             );
         }

@@ -59,7 +59,7 @@
 | ID | 요구사항 | 우선순위 |
 |----|---------|---------:|
 | FR-01 | Spot 모델: 10종 카테고리, source(crew/user/qr), crewNote, externalPlace | 높음 |
-| FR-02 | Route 모델: 7종 테마, RouteSpot 배열, stats, parentRoute(변형) | 높음 |
+| FR-02 | Route 모델: 7종 테마, SpotLineSpot 배열, stats, parentRoute(변형) | 높음 |
 | FR-03 | `GET /api/v2/places/search` Place API 검색 프록시 | 높음 |
 | FR-04 | `GET /api/v2/places/{provider}/{placeId}` 상세 조회 + 24h 캐싱 | 높음 |
 | FR-05~11 | Spot/Route CRUD 및 특화 엔드포인트 | 높음 |
@@ -79,7 +79,7 @@
 
 2. **데이터 모델**
    - **Spot**: spots 테이블, 25개 필드, 6개 인덱스
-   - **Route**: routes 테이블, RouteSpot 관계 테이블, 자기참조(parentRoute)
+   - **Route**: routes 테이블, SpotLineSpot 관계 테이블, 자기참조(parentRoute)
    - **PlaceInfo**: 네이버/카카오 API 응답 정규화 DTO (11개 필드)
    - **Index**: 슬러그, 지역, 카테고리, 위경도 등 검색 성능 최적화
 
@@ -105,7 +105,7 @@
 **실제 구현 파일** (약 40개):
 
 **Domain Layer**:
-- Entity: `Spot.java`, `Route.java`, `RouteSpot.java`, `SpotMedia.java`
+- Entity: `Spot.java`, `Route.java`, `SpotLineSpot.java`, `SpotMedia.java`
 - Enum: `SpotCategory.java`, `SpotSource.java`, `RouteTheme.java`, `MediaType.java`
 - Repository: `SpotRepository.java`, `RouteRepository.java`, `SpotMediaRepository.java`
 
@@ -197,7 +197,7 @@
 ✅ **설계 요구사항 충족**:
 - 12개 설계 API 엔드포인트 100% 구현
 - 4개 엔티티 + 4개 Enum: 모든 필드 정확히 매핑
-- Spot 3,628줄, Route 3,425줄, RouteSpot 1,245줄 코드
+- Spot 3,628줄, Route 3,425줄, SpotLineSpot 1,245줄 코드
 - 13개 인덱스 모두 정확하게 생성
 
 ✅ **추가 구현 기능** (설계 미포함, 개선 사항):
@@ -230,7 +230,7 @@
 
 ✅ **Route 도메인**
 - Route JPA 엔티티: 18개 필드, 5개 인덱스, 자기참조(변형 추적)
-- RouteSpot 중간 엔티티: spot FK, route FK, 순서, 이동 정보, 체류 시간
+- SpotLineSpot 중간 엔티티: spot FK, route FK, 순서, 이동 정보, 체류 시간
 - Route CRUD 서비스: 생성(Spot 참조), 조회(상세, 인기), totalDuration/totalDistance 자동 계산
 - Route Controller: 4개 엔드포인트, theme/area 필터
 - Route DTO: CreateRouteRequest, RouteDetailResponse, RoutePreviewResponse
@@ -436,7 +436,7 @@ src/main/java/com/spotline/api/
 │   ├── entity/
 │   │   ├── Spot.java           (25개 필드)
 │   │   ├── Route.java          (18개 필드)
-│   │   ├── RouteSpot.java      (9개 필드)
+│   │   ├── SpotLineSpot.java      (9개 필드)
 │   │   └── SpotMedia.java      (4개 필드)
 │   ├── enums/
 │   │   ├── SpotCategory.java   (10종: CAFE, RESTAURANT, ...)

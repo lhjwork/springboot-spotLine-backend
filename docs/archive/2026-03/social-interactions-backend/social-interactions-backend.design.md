@@ -97,7 +97,7 @@ public class SpotSave {
 ```java
 // domain/entity/RouteLike.java
 @Entity
-@Table(name = "route_likes", uniqueConstraints = {
+@Table(name = "spotline_likes", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "route_id"})
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -123,7 +123,7 @@ public class RouteLike {
 ```java
 // domain/entity/RouteSave.java
 @Entity
-@Table(name = "route_saves", uniqueConstraints = {
+@Table(name = "spotline_saves", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"user_id", "route_id"})
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
@@ -174,8 +174,8 @@ public class UserFollow {
 ```java
 // domain/entity/UserRoute.java
 @Entity
-@Table(name = "user_routes", indexes = {
-    @Index(name = "idx_user_routes_user_id", columnList = "userId")
+@Table(name = "user_spotlines", indexes = {
+    @Index(name = "idx_user_spotlines_user_id", columnList = "userId")
 })
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class UserRoute {
@@ -380,12 +380,12 @@ public class SocialService {
     }
 
     /** Route 좋아요 토글 */
-    public SocialToggleResponse toggleRouteLike(String userId, UUID routeId) {
+    public SocialToggleResponse toggleRouteLike(String userId, UUID spotLineId) {
         // Spot과 동일 패턴, Route + RouteLike 사용
     }
 
     /** Route 저장 토글 */
-    public SocialToggleResponse toggleRouteSave(String userId, UUID routeId) {
+    public SocialToggleResponse toggleRouteSave(String userId, UUID spotLineId) {
         // 동일 패턴
     }
 
@@ -400,7 +400,7 @@ public class SocialService {
     }
 
     /** Route 소셜 상태 조회 */
-    public SocialStatusResponse getRouteSocialStatus(String userId, UUID routeId) {
+    public SocialStatusResponse getRouteSocialStatus(String userId, UUID spotLineId) {
         // Spot과 동일 패턴
     }
 }
@@ -488,8 +488,8 @@ public class UserRouteService {
     private final RouteRepository routeRepository;
 
     /** Route 복제 */
-    public ReplicateRouteResponse replicate(String userId, UUID routeId, String scheduledDate) {
-        Route route = routeRepository.findById(routeId)
+    public ReplicateRouteResponse replicate(String userId, UUID spotLineId, String scheduledDate) {
+        Route route = routeRepository.findById(spotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         UserRoute userRoute = userRouteRepository.save(UserRoute.builder()
@@ -620,7 +620,7 @@ public class UserProfileResponse {
 @Data @Builder
 public class MyRouteResponse {
     private String id;
-    private String routeId;
+    private String spotLineId;
     private String routeSlug;
     private String title;
     private String area;
@@ -628,14 +628,14 @@ public class MyRouteResponse {
     private String scheduledDate;
     private String status;
     private String completedAt;
-    private String parentRouteId;
+    private String parentSpotLineId;
     private String createdAt;
 
     public static MyRouteResponse from(UserRoute ur) {
         Route route = ur.getRoute();
         return MyRouteResponse.builder()
             .id(ur.getId().toString())
-            .routeId(route.getId().toString())
+            .spotLineId(route.getId().toString())
             .routeSlug(route.getSlug())
             .title(route.getTitle())
             .area(route.getArea())
@@ -643,7 +643,7 @@ public class MyRouteResponse {
             .scheduledDate(ur.getScheduledDate())
             .status(ur.getStatus())
             .completedAt(ur.getCompletedAt() != null ? ur.getCompletedAt().toString() : null)
-            .parentRouteId(route.getId().toString())
+            .parentSpotLineId(route.getId().toString())
             .createdAt(ur.getCreatedAt().toString())
             .build();
     }
@@ -883,13 +883,13 @@ public class UserRouteController {
     private final AuthUtil authUtil;
     private final RouteRepository routeRepository;
 
-    // POST /api/v2/routes/{routeId}/replicate
-    @PostMapping("/routes/{routeId}/replicate")
+    // POST /api/v2/routes/{spotLineId}/replicate
+    @PostMapping("/routes/{spotLineId}/replicate")
     public ReplicateRouteResponse replicate(
-            @PathVariable UUID routeId,
+            @PathVariable UUID spotLineId,
             @RequestBody ReplicateRouteRequest request) {
         return userRouteService.replicate(
-            authUtil.requireUserId(), routeId, request.getScheduledDate());
+            authUtil.requireUserId(), spotLineId, request.getScheduledDate());
     }
 
     // GET /api/v2/users/me/routes?status=scheduled&page=0
@@ -920,12 +920,12 @@ public class UserRouteController {
         userRouteService.delete(authUtil.requireUserId(), myRouteId);
     }
 
-    // GET /api/v2/routes/{routeId}/variations?page=0
-    @GetMapping("/routes/{routeId}/variations")
+    // GET /api/v2/routes/{spotLineId}/variations?page=0
+    @GetMapping("/routes/{spotLineId}/variations")
     public SimplePageResponse<RoutePreviewResponse> getVariations(
-            @PathVariable UUID routeId,
+            @PathVariable UUID spotLineId,
             @RequestParam(defaultValue = "0") int page) {
-        Route route = routeRepository.findById(routeId)
+        Route route = routeRepository.findById(spotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         // variations는 Route.variations (parentRoute 관계)
         // 간단히 Page로 변환

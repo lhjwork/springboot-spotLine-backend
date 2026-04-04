@@ -285,11 +285,11 @@ public class SpotController {
 
 | Method | Summary |
 |--------|---------|
-| `POST /routes/{routeId}/replicate` | 루트 복제 (내 일정으로) |
+| `POST /routes/{spotLineId}/replicate` | 루트 복제 (내 일정으로) |
 | `GET /users/me/routes` | 내 루트 목록 |
 | `PATCH /users/me/routes/{myRouteId}` | 내 루트 상태 변경 |
 | `DELETE /users/me/routes/{myRouteId}` | 내 루트 삭제 |
-| `GET /routes/{routeId}/variations` | 루트 변형 목록 |
+| `GET /routes/{spotLineId}/variations` | 루트 변형 목록 |
 
 #### 4.10 QrScanController
 
@@ -424,7 +424,7 @@ public class CreateRouteRequest {
     private String area;
 
     @Schema(description = "스팟 목록 (순서대로)")
-    private List<RouteSpotRequest> spots;
+    private List<SpotLineSpotRequest> spots;
 }
 ```
 

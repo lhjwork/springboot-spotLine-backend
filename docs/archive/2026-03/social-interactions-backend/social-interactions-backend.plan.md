@@ -51,8 +51,8 @@ GET    /api/v2/users/me/saves?type&page
 GET    /api/v2/users/me/routes?status&page
 
 # Replication
-POST   /api/v2/routes/{routeId}/replicate
-GET    /api/v2/routes/{routeId}/variations?page
+POST   /api/v2/routes/{spotLineId}/replicate
+GET    /api/v2/routes/{spotLineId}/variations?page
 ```
 
 ### 1.2 Backend (springboot-spotLine-backend) — 미구현
@@ -91,7 +91,7 @@ GET    /api/v2/routes/{routeId}/variations?page
 | E-4 | `RouteLike` | 유저-Route 좋아요 관계 |
 | E-5 | `RouteSave` | 유저-Route 저장 관계 |
 | E-6 | `UserFollow` | 팔로우 관계 (followerId + followingId) |
-| E-7 | `UserRoute` | Route 복제 (userId + routeId + scheduledDate + status) |
+| E-7 | `UserRoute` | Route 복제 (userId + spotLineId + scheduledDate + status) |
 
 ### 2.2 Backend — API 컨트롤러 (신규)
 
@@ -268,14 +268,14 @@ SecurityConfig 업데이트
 ```json
 {
   "id": "uuid",
-  "routeId": "uuid",
+  "spotLineId": "uuid",
   "routeSlug": "hongdae-cafe-tour",
   "title": "홍대 카페투어",
   "area": "홍대",
   "spotsCount": 5,
   "scheduledDate": "2026-04-01",
   "status": "scheduled",
-  "parentRouteId": "uuid"
+  "parentSpotLineId": "uuid"
 }
 ```
 

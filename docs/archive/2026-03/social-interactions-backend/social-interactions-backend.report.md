@@ -65,10 +65,10 @@
 | 1 | User | users | id (UUID), email, nickname, avatar, bio, instagramId, followersCount, followingCount | ✅ |
 | 2 | SpotLike | spot_likes | userId, spotId (unique constraint), createdAt | ✅ |
 | 3 | SpotSave | spot_saves | userId, spotId (unique constraint), createdAt | ✅ |
-| 4 | RouteLike | route_likes | userId, routeId (unique constraint), createdAt | ✅ |
-| 5 | RouteSave | route_saves | userId, routeId (unique constraint), createdAt | ✅ |
+| 4 | RouteLike | spotline_likes | userId, spotLineId (unique constraint), createdAt | ✅ |
+| 5 | RouteSave | spotline_saves | userId, spotLineId (unique constraint), createdAt | ✅ |
 | 6 | UserFollow | user_follows | followerId, followingId (unique constraint), createdAt | ✅ |
-| 7 | UserRoute | user_routes | userId, routeId, scheduledDate, status, completedAt | ✅ |
+| 7 | UserRoute | user_spotlines | userId, spotLineId, scheduledDate, status, completedAt | ✅ |
 
 **Notes**:
 - User.id = Supabase UUID (no @GeneratedValue)
@@ -97,7 +97,7 @@
 | 1 | SocialController | POST /spots/{id}/like, POST /spots/{id}/save, POST /routes/{id}/like, POST /routes/{id}/save, GET /spots/{id}/social, GET /routes/{id}/social | 6 | ✅ |
 | 2 | FollowController | POST /users/{userId}/follow, DELETE /users/{userId}/follow, GET /users/{userId}/follow/status, GET /users/{userId}/followers, GET /users/{userId}/following | 5 | ✅ |
 | 3 | UserController | GET /users/{userId}/profile, GET /users/{userId}/likes/spots, GET /users/{userId}/saves/routes, GET /users/me/saves | 4 | ✅ |
-| 4 | UserRouteController | POST /routes/{routeId}/replicate, GET /users/me/routes, PATCH /users/me/routes/{myRouteId}, DELETE /users/me/routes/{myRouteId}, GET /routes/{routeId}/variations | 5 | ✅ |
+| 4 | UserRouteController | POST /routes/{spotLineId}/replicate, GET /users/me/routes, PATCH /users/me/routes/{myRouteId}, DELETE /users/me/routes/{myRouteId}, GET /routes/{spotLineId}/variations | 5 | ✅ |
 
 **Total**: 20/20 endpoints implemented and tested against front-spotLine spec
 
@@ -109,7 +109,7 @@
 - FollowResponse (followed, followersCount)
 - FollowStatusResponse (isFollowing — with @JsonProperty)
 - UserProfileResponse (with nested UserStatsResponse for stats)
-- MyRouteResponse (with null-safety checks, proper parentRouteId logic)
+- MyRouteResponse (with null-safety checks, proper parentSpotLineId logic)
 - ReplicateRouteResponse (myRoute + replicationsCount)
 - SimplePageResponse<T> (items, hasMore — reusable for any list API)
 
@@ -183,7 +183,7 @@
 | SocialToggleResponse schema | `{ liked, savesCount, likesCount }` | Exact match | ✅ |
 | SocialStatusResponse schema | `{ isLiked, isSaved }` | Match via @JsonProperty | ✅ |
 | UserProfileResponse schema | `{ id, nickname, avatar, bio, stats: {...} }` | Exact match + nested inner class | ✅ |
-| MyRouteResponse schema | `{ id, routeId, routeSlug, title, status, scheduledDate }` | Exact match with null safety | ✅ |
+| MyRouteResponse schema | `{ id, spotLineId, routeSlug, title, status, scheduledDate }` | Exact match with null safety | ✅ |
 | Pagination | `{ items: [], hasMore: boolean }` | SimplePageResponse<T> generic implementation | ✅ |
 | API Routes | 20 specific routes from plan | All 20 routes implemented at /api/v2/* | ✅ |
 

@@ -1,6 +1,6 @@
 package com.spotline.api.domain.entity;
 
-import com.spotline.api.domain.enums.RouteTheme;
+import com.spotline.api.domain.enums.SpotLineTheme;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,19 +12,19 @@ import java.util.List;
 import java.util.UUID;
 
 @Entity
-@Table(name = "routes", indexes = {
-        @Index(name = "idx_route_slug", columnList = "slug", unique = true),
-        @Index(name = "idx_route_area", columnList = "area"),
-        @Index(name = "idx_route_theme", columnList = "theme"),
-        @Index(name = "idx_route_active", columnList = "isActive"),
-        @Index(name = "idx_route_parent", columnList = "parent_route_id")
+@Table(name = "spotlines", indexes = {
+        @Index(name = "idx_spotline_slug", columnList = "slug", unique = true),
+        @Index(name = "idx_spotline_area", columnList = "area"),
+        @Index(name = "idx_spotline_theme", columnList = "theme"),
+        @Index(name = "idx_spotline_active", columnList = "isActive"),
+        @Index(name = "idx_spotline_parent", columnList = "parent_spotline_id")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Route {
+public class SpotLine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -41,7 +41,7 @@ public class Route {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private RouteTheme theme;
+    private SpotLineTheme theme;
 
     /** 대표 지역 */
     @Column(nullable = false)
@@ -55,11 +55,11 @@ public class Route {
     @Builder.Default
     private Integer totalDistance = 0;
 
-    // ---- Route Spots (순서 있는 Spot 목록) ----
-    @OneToMany(mappedBy = "route", cascade = CascadeType.ALL, orphanRemoval = true)
+    // ---- SpotLine Spots (순서 있는 Spot 목록) ----
+    @OneToMany(mappedBy = "spotLine", cascade = CascadeType.ALL, orphanRemoval = true)
     @OrderBy("spotOrder ASC")
     @Builder.Default
-    private List<RouteSpot> spots = new ArrayList<>();
+    private List<SpotLineSpot> spots = new ArrayList<>();
 
     // ---- Stats ----
     @Builder.Default
@@ -82,14 +82,14 @@ public class Route {
     private String creatorId;
     private String creatorName;
 
-    /** 변형 원본 Route */
+    /** 변형 원본 SpotLine */
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_route_id")
-    private Route parentRoute;
+    @JoinColumn(name = "parent_spotline_id")
+    private SpotLine parentSpotLine;
 
-    @OneToMany(mappedBy = "parentRoute")
+    @OneToMany(mappedBy = "parentSpotLine")
     @Builder.Default
-    private List<Route> variations = new ArrayList<>();
+    private List<SpotLine> variations = new ArrayList<>();
 
     @Builder.Default
     private Boolean isActive = true;

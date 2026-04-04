@@ -4,7 +4,7 @@ import com.spotline.api.domain.entity.Comment;
 import com.spotline.api.domain.enums.CommentTargetType;
 import com.spotline.api.domain.repository.CommentRepository;
 import com.spotline.api.domain.repository.SpotRepository;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.dto.request.CreateCommentRequest;
 import com.spotline.api.dto.request.UpdateCommentRequest;
 import com.spotline.api.dto.response.CommentResponse;
@@ -25,7 +25,7 @@ public class CommentService {
 
     private final CommentRepository commentRepository;
     private final SpotRepository spotRepository;
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> getComments(CommentTargetType targetType, UUID targetId, int page, int size) {
@@ -105,7 +105,7 @@ public class CommentService {
     private void validateTargetExists(CommentTargetType targetType, UUID targetId) {
         boolean exists = switch (targetType) {
             case SPOT -> spotRepository.existsById(targetId);
-            case ROUTE -> routeRepository.existsById(targetId);
+            case SPOTLINE -> spotLineRepository.existsById(targetId);
         };
         if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다");
@@ -118,9 +118,9 @@ public class CommentService {
                 spot.setCommentsCount(Math.max(0, spot.getCommentsCount() + delta));
                 spotRepository.save(spot);
             });
-            case ROUTE -> routeRepository.findById(targetId).ifPresent(route -> {
-                route.setCommentsCount(Math.max(0, route.getCommentsCount() + delta));
-                routeRepository.save(route);
+            case SPOTLINE -> spotLineRepository.findById(targetId).ifPresent(spotLine -> {
+                spotLine.setCommentsCount(Math.max(0, spotLine.getCommentsCount() + delta));
+                spotLineRepository.save(spotLine);
             });
         }
     }

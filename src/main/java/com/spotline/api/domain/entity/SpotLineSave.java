@@ -8,15 +8,15 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "route_saves", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "route_id"})
+@Table(name = "spotline_saves", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "spotline_id"})
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RouteSave {
+public class SpotLineSave {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -26,8 +26,8 @@ public class RouteSave {
     private String userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "route_id", nullable = false)
-    private Route route;
+    @JoinColumn(name = "spotline_id", nullable = false)
+    private SpotLine spotLine;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

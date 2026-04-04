@@ -1,19 +1,19 @@
 package com.spotline.api.service;
 
 import com.github.slugify.Slugify;
-import com.spotline.api.domain.entity.Route;
-import com.spotline.api.domain.entity.RouteSpot;
+import com.spotline.api.domain.entity.SpotLine;
+import com.spotline.api.domain.entity.SpotLineSpot;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.enums.FeedSort;
-import com.spotline.api.domain.enums.RouteTheme;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.enums.SpotLineTheme;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.infrastructure.s3.S3Service;
-import com.spotline.api.dto.request.CreateRouteRequest;
-import com.spotline.api.dto.request.UpdateRouteRequest;
-import com.spotline.api.dto.response.RouteDetailResponse;
+import com.spotline.api.dto.request.CreateSpotLineRequest;
+import com.spotline.api.dto.request.UpdateSpotLineRequest;
+import com.spotline.api.dto.response.SpotLineDetailResponse;
 import com.spotline.api.dto.response.SlugResponse;
-import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.dto.response.SpotLinePreviewResponse;
 import com.spotline.api.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -31,106 +31,106 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Slf4j
 @Transactional(readOnly = true)
-public class RouteService {
+public class SpotLineService {
 
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
     private final SpotRepository spotRepository;
     private final S3Service s3Service;
     private final Slugify slugify = Slugify.builder().transliterator(true).build();
 
-    public Route getBySlug(String slug) {
-        return routeRepository.findBySlugAndIsActiveTrue(slug)
-                .orElseThrow(() -> new ResourceNotFoundException("Route", slug));
+    public SpotLine getBySlug(String slug) {
+        return spotLineRepository.findBySlugAndIsActiveTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("SpotLine", slug));
     }
 
-    public RouteDetailResponse getDetailBySlug(String slug) {
-        Route route = getBySlug(slug);
-        return RouteDetailResponse.from(route);
+    public SpotLineDetailResponse getDetailBySlug(String slug) {
+        SpotLine spotLine = getBySlug(slug);
+        return SpotLineDetailResponse.from(spotLine);
     }
 
-    public Page<RoutePreviewResponse> getPopularPreviews(
+    public Page<SpotLinePreviewResponse> getPopularPreviews(
             String area, String theme, String keyword, FeedSort sort, Pageable pageable) {
         FeedSort effectiveSort = (sort != null) ? sort : FeedSort.POPULAR;
-        Page<Route> routes;
+        Page<SpotLine> spotLines;
         boolean hasKeyword = keyword != null && !keyword.isBlank();
 
         if (effectiveSort == FeedSort.NEWEST) {
-            routes = hasKeyword
+            spotLines = hasKeyword
                 ? getNewestWithKeyword(area, theme, keyword, pageable)
                 : getNewest(area, theme, pageable);
         } else {
-            routes = hasKeyword
+            spotLines = hasKeyword
                 ? getPopularWithKeyword(area, theme, keyword, pageable)
                 : getPopular(area, theme, pageable);
         }
 
         String s3BaseUrl = getS3BaseUrl();
-        return routes.map(route -> RoutePreviewResponse.from(route, s3BaseUrl));
+        return spotLines.map(sl -> SpotLinePreviewResponse.from(sl, s3BaseUrl));
     }
 
-    private Page<Route> getNewest(String area, String theme, Pageable pageable) {
+    private Page<SpotLine> getNewest(String area, String theme, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaLikeAndThemeAndNewest(
-                    area, RouteTheme.valueOf(theme.toUpperCase()), pageable);
+            return spotLineRepository.findByAreaLikeAndThemeAndNewest(
+                    area, SpotLineTheme.valueOf(theme.toUpperCase()), pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaLikeAndNewest(area, pageable);
+            return spotLineRepository.findByAreaLikeAndNewest(area, pageable);
         } else if (theme != null) {
-            return routeRepository.findByThemeAndIsActiveTrueOrderByCreatedAtDesc(
-                    RouteTheme.valueOf(theme.toUpperCase()), pageable);
+            return spotLineRepository.findByThemeAndIsActiveTrueOrderByCreatedAtDesc(
+                    SpotLineTheme.valueOf(theme.toUpperCase()), pageable);
         }
-        return routeRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
+        return spotLineRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
     }
 
-    private Page<Route> getPopularWithKeyword(String area, String theme, String keyword, Pageable pageable) {
+    private Page<SpotLine> getPopularWithKeyword(String area, String theme, String keyword, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaLikeAndThemeAndKeywordAndPopular(
-                    area, RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+            return spotLineRepository.findByAreaLikeAndThemeAndKeywordAndPopular(
+                    area, SpotLineTheme.valueOf(theme.toUpperCase()), keyword, pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaLikeAndKeywordAndPopular(area, keyword, pageable);
+            return spotLineRepository.findByAreaLikeAndKeywordAndPopular(area, keyword, pageable);
         } else if (theme != null) {
-            return routeRepository.findByThemeAndKeywordAndPopular(
-                    RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+            return spotLineRepository.findByThemeAndKeywordAndPopular(
+                    SpotLineTheme.valueOf(theme.toUpperCase()), keyword, pageable);
         }
-        return routeRepository.findByKeywordAndPopular(keyword, pageable);
+        return spotLineRepository.findByKeywordAndPopular(keyword, pageable);
     }
 
-    private Page<Route> getNewestWithKeyword(String area, String theme, String keyword, Pageable pageable) {
+    private Page<SpotLine> getNewestWithKeyword(String area, String theme, String keyword, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaLikeAndThemeAndKeywordAndNewest(
-                    area, RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+            return spotLineRepository.findByAreaLikeAndThemeAndKeywordAndNewest(
+                    area, SpotLineTheme.valueOf(theme.toUpperCase()), keyword, pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaLikeAndKeywordAndNewest(area, keyword, pageable);
+            return spotLineRepository.findByAreaLikeAndKeywordAndNewest(area, keyword, pageable);
         } else if (theme != null) {
-            return routeRepository.findByThemeAndKeywordAndNewest(
-                    RouteTheme.valueOf(theme.toUpperCase()), keyword, pageable);
+            return spotLineRepository.findByThemeAndKeywordAndNewest(
+                    SpotLineTheme.valueOf(theme.toUpperCase()), keyword, pageable);
         }
-        return routeRepository.findByKeywordAndNewest(keyword, pageable);
+        return spotLineRepository.findByKeywordAndNewest(keyword, pageable);
     }
 
     @Transactional
-    public RouteDetailResponse createAndReturn(CreateRouteRequest request, String userId, String creatorType) {
-        Route route = create(request, userId, creatorType);
-        return RouteDetailResponse.from(route);
+    public SpotLineDetailResponse createAndReturn(CreateSpotLineRequest request, String userId, String creatorType) {
+        SpotLine spotLine = create(request, userId, creatorType);
+        return SpotLineDetailResponse.from(spotLine);
     }
 
-    public Page<Route> getPopular(String area, String theme, Pageable pageable) {
+    public Page<SpotLine> getPopular(String area, String theme, Pageable pageable) {
         if (area != null && theme != null) {
-            return routeRepository.findByAreaLikeAndThemeAndPopular(
-                    area, com.spotline.api.domain.enums.RouteTheme.valueOf(theme.toUpperCase()), pageable);
+            return spotLineRepository.findByAreaLikeAndThemeAndPopular(
+                    area, com.spotline.api.domain.enums.SpotLineTheme.valueOf(theme.toUpperCase()), pageable);
         } else if (area != null) {
-            return routeRepository.findByAreaLikeAndPopular(area, pageable);
+            return spotLineRepository.findByAreaLikeAndPopular(area, pageable);
         } else if (theme != null) {
-            return routeRepository.findByThemeAndIsActiveTrueOrderByLikesCountDesc(
-                    com.spotline.api.domain.enums.RouteTheme.valueOf(theme.toUpperCase()), pageable);
+            return spotLineRepository.findByThemeAndIsActiveTrueOrderByLikesCountDesc(
+                    com.spotline.api.domain.enums.SpotLineTheme.valueOf(theme.toUpperCase()), pageable);
         }
-        return routeRepository.findByIsActiveTrueOrderByLikesCountDesc(pageable);
+        return spotLineRepository.findByIsActiveTrueOrderByLikesCountDesc(pageable);
     }
 
     @Transactional
-    public Route create(CreateRouteRequest request, String userId, String creatorType) {
+    public SpotLine create(CreateSpotLineRequest request, String userId, String creatorType) {
         String slug = generateUniqueSlug(request.getTitle());
 
-        Route route = Route.builder()
+        SpotLine spotLine = SpotLine.builder()
                 .slug(slug)
                 .title(request.getTitle())
                 .description(request.getDescription())
@@ -142,22 +142,22 @@ public class RouteService {
                 .build();
 
         // 변형 원본 연결
-        if (request.getParentRouteId() != null) {
-            Route parent = routeRepository.findById(request.getParentRouteId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Route", request.getParentRouteId().toString()));
-            route.setParentRoute(parent);
+        if (request.getParentSpotLineId() != null) {
+            SpotLine parent = spotLineRepository.findById(request.getParentSpotLineId())
+                    .orElseThrow(() -> new ResourceNotFoundException("SpotLine", request.getParentSpotLineId().toString()));
+            spotLine.setParentSpotLine(parent);
         }
 
-        // RouteSpot 추가
+        // SpotLineSpot 추가
         int totalDuration = 0;
         int totalDistance = 0;
         for (int i = 0; i < request.getSpots().size(); i++) {
-            CreateRouteRequest.RouteSpotRequest spotReq = request.getSpots().get(i);
+            CreateSpotLineRequest.SpotLineSpotRequest spotReq = request.getSpots().get(i);
             Spot spot = spotRepository.findById(spotReq.getSpotId())
                     .orElseThrow(() -> new ResourceNotFoundException("Spot", spotReq.getSpotId().toString()));
 
-            RouteSpot routeSpot = RouteSpot.builder()
-                    .route(route)
+            SpotLineSpot spotLineSpot = SpotLineSpot.builder()
+                    .spotLine(spotLine)
                     .spot(spot)
                     .spotOrder(spotReq.getOrder() != null ? spotReq.getOrder() : i + 1)
                     .suggestedTime(spotReq.getSuggestedTime())
@@ -167,41 +167,41 @@ public class RouteService {
                     .transitionNote(spotReq.getTransitionNote())
                     .build();
 
-            route.getSpots().add(routeSpot);
+            spotLine.getSpots().add(spotLineSpot);
 
             if (spotReq.getStayDuration() != null) totalDuration += spotReq.getStayDuration();
             if (spotReq.getWalkingTimeToNext() != null) totalDuration += spotReq.getWalkingTimeToNext();
             if (spotReq.getDistanceToNext() != null) totalDistance += spotReq.getDistanceToNext();
         }
 
-        route.setTotalDuration(totalDuration);
-        route.setTotalDistance(totalDistance);
+        spotLine.setTotalDuration(totalDuration);
+        spotLine.setTotalDistance(totalDistance);
 
-        return routeRepository.save(route);
+        return spotLineRepository.save(spotLine);
     }
 
     @Transactional
-    public RouteDetailResponse update(String slug, UpdateRouteRequest request, String userId) {
-        Route route = getBySlug(slug);
-        verifyOwnership(route.getCreatorId(), userId);
+    public SpotLineDetailResponse update(String slug, UpdateSpotLineRequest request, String userId) {
+        SpotLine spotLine = getBySlug(slug);
+        verifyOwnership(spotLine.getCreatorId(), userId);
 
-        if (request.getTitle() != null) route.setTitle(request.getTitle());
-        if (request.getDescription() != null) route.setDescription(request.getDescription());
-        if (request.getTheme() != null) route.setTheme(request.getTheme());
-        if (request.getArea() != null) route.setArea(request.getArea());
+        if (request.getTitle() != null) spotLine.setTitle(request.getTitle());
+        if (request.getDescription() != null) spotLine.setDescription(request.getDescription());
+        if (request.getTheme() != null) spotLine.setTheme(request.getTheme());
+        if (request.getArea() != null) spotLine.setArea(request.getArea());
 
         if (request.getSpots() != null) {
-            route.getSpots().clear(); // orphanRemoval 자동 삭제
+            spotLine.getSpots().clear(); // orphanRemoval 자동 삭제
 
             int totalDuration = 0;
             int totalDistance = 0;
             for (int i = 0; i < request.getSpots().size(); i++) {
-                CreateRouteRequest.RouteSpotRequest spotReq = request.getSpots().get(i);
+                CreateSpotLineRequest.SpotLineSpotRequest spotReq = request.getSpots().get(i);
                 Spot spot = spotRepository.findById(spotReq.getSpotId())
                         .orElseThrow(() -> new ResourceNotFoundException("Spot", spotReq.getSpotId().toString()));
 
-                RouteSpot routeSpot = RouteSpot.builder()
-                        .route(route)
+                SpotLineSpot spotLineSpot = SpotLineSpot.builder()
+                        .spotLine(spotLine)
                         .spot(spot)
                         .spotOrder(spotReq.getOrder() != null ? spotReq.getOrder() : i + 1)
                         .suggestedTime(spotReq.getSuggestedTime())
@@ -211,24 +211,24 @@ public class RouteService {
                         .transitionNote(spotReq.getTransitionNote())
                         .build();
 
-                route.getSpots().add(routeSpot);
+                spotLine.getSpots().add(spotLineSpot);
                 if (spotReq.getStayDuration() != null) totalDuration += spotReq.getStayDuration();
                 if (spotReq.getWalkingTimeToNext() != null) totalDuration += spotReq.getWalkingTimeToNext();
                 if (spotReq.getDistanceToNext() != null) totalDistance += spotReq.getDistanceToNext();
             }
-            route.setTotalDuration(totalDuration);
-            route.setTotalDistance(totalDistance);
+            spotLine.setTotalDuration(totalDuration);
+            spotLine.setTotalDistance(totalDistance);
         }
 
-        return RouteDetailResponse.from(routeRepository.save(route));
+        return SpotLineDetailResponse.from(spotLineRepository.save(spotLine));
     }
 
     @Transactional
     public void delete(String slug, String userId) {
-        Route route = getBySlug(slug);
-        verifyOwnership(route.getCreatorId(), userId);
-        route.setIsActive(false);
-        routeRepository.save(route);
+        SpotLine spotLine = getBySlug(slug);
+        verifyOwnership(spotLine.getCreatorId(), userId);
+        spotLine.setIsActive(false);
+        spotLineRepository.save(spotLine);
     }
 
     private void verifyOwnership(String creatorId, String userId) {
@@ -238,7 +238,7 @@ public class RouteService {
     }
 
     public List<SlugResponse> getAllSlugs() {
-        return routeRepository.findAllActiveSlugs().stream()
+        return spotLineRepository.findAllActiveSlugs().stream()
                 .map(r -> SlugResponse.builder()
                         .slug(r.getSlug())
                         .updatedAt(r.getUpdatedAt())
@@ -257,7 +257,7 @@ public class RouteService {
         }
         String slug = base;
         int counter = 1;
-        while (routeRepository.existsBySlug(slug)) {
+        while (spotLineRepository.existsBySlug(slug)) {
             slug = base + "-" + counter++;
         }
         return slug;

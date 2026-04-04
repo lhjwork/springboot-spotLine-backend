@@ -12,5 +12,5 @@ import java.time.LocalDate;
 public class DailyContentTrendResponse {
     private LocalDate date;
     private long spotCount;
-    private long routeCount;
+    private long spotLineCount;
 }

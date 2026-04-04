@@ -131,7 +131,7 @@ Admin GET /api/v2/places/search?query=성수 카페&provider=kakao
 │──────────────│
 │ id (UUID PK) │
 │ slug (UNIQUE)│        ┌──────────────┐
-│ title        │        │  RouteSpot   │        ┌──────────────┐
+│ title        │        │  SpotLineSpot   │        ┌──────────────┐
 │ category     │◀───────│──────────────│────────│    Route      │
 │ source       │  spot  │ id (UUID PK) │ route  │──────────────│
 │ crewNote     │        │ spot_id (FK) │        │ id (UUID PK) │
@@ -150,7 +150,7 @@ Admin GET /api/v2/places/search?query=성수 카페&provider=kakao
 │ timestamps   │                                │ timestamps   │
 └──────────────┘                                └──────────────┘
 
-[Spot] 1 ──── N [RouteSpot] N ──── 1 [Route]
+[Spot] 1 ──── N [SpotLineSpot] N ──── 1 [Route]
 [Route] 1 ──── N [Route] (self: parentRoute → variations)
 ```
 
@@ -258,9 +258,9 @@ CREATE INDEX idx_route_active ON routes(is_active);
 CREATE INDEX idx_route_parent ON routes(parent_route_id);
 
 -- ============================================
--- RouteSpot: Route-Spot 연결 (순서, 이동 정보)
+-- SpotLineSpot: Route-Spot 연결 (순서, 이동 정보)
 -- ============================================
-CREATE TABLE route_spots (
+CREATE TABLE spotline_spots (
     id                  UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     route_id            UUID NOT NULL REFERENCES routes(id) ON DELETE CASCADE,
     spot_id             UUID NOT NULL REFERENCES spots(id),
@@ -273,8 +273,8 @@ CREATE TABLE route_spots (
     transition_note     VARCHAR(200)             -- "골목길로 5분"
 );
 
-CREATE INDEX idx_route_spot_route ON route_spots(route_id);
-CREATE INDEX idx_route_spot_spot  ON route_spots(spot_id);
+CREATE INDEX idx_route_spot_route ON spotline_spots(route_id);
+CREATE INDEX idx_route_spot_spot  ON spotline_spots(spot_id);
 ```
 
 ### 3.3 JPA Entity → Table 매핑 요약
@@ -283,7 +283,7 @@ CREATE INDEX idx_route_spot_spot  ON route_spots(spot_id);
 |--------|-------|-----------------|
 | `Spot` | `spots` | `@Entity`, UUID PK, `@ElementCollection`(tags, media) |
 | `Route` | `routes` | `@Entity`, UUID PK, self-referencing `@ManyToOne`(parentRoute) |
-| `RouteSpot` | `route_spots` | `@Entity`, `@ManyToOne` Route + Spot, `@OrderBy("spotOrder")` |
+| `SpotLineSpot` | `spotline_spots` | `@Entity`, `@ManyToOne` Route + Spot, `@OrderBy("spotOrder")` |
 
 ### 3.4 PlaceInfo (캐시 전용, DB 저장 안 함)
 
@@ -651,7 +651,7 @@ com.spotline.api/
 │   ├── entity/
 │   │   ├── Spot              JPA Entity
 │   │   ├── Route             JPA Entity
-│   │   └── RouteSpot         JPA Entity (관계 테이블)
+│   │   └── SpotLineSpot         JPA Entity (관계 테이블)
 │   ├── enums/
 │   │   ├── SpotCategory      10종
 │   │   ├── SpotSource        3종 (CREW, USER, QR)
@@ -703,7 +703,7 @@ Controller ──→ Service ──→ Repository
 
 | Target | Rule | Example |
 |--------|------|---------|
-| Entity Class | PascalCase | `Spot`, `Route`, `RouteSpot` |
+| Entity Class | PascalCase | `Spot`, `Route`, `SpotLineSpot` |
 | Repository | `{Entity}Repository` | `SpotRepository` |
 | Service | `{Domain}Service` | `SpotService`, `PlaceApiService` |
 | Controller | `{Domain}Controller` | `SpotController` |

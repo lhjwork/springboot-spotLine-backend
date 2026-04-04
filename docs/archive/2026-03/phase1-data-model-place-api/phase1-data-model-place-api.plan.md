@@ -56,7 +56,7 @@ Spotline 플랫폼의 경험 기반 소셜 구조(Spot/Route)를 지탱하는 **
 ### 2.1 In Scope
 
 - [ ] **Spot 모델**: 기존 Store 스키마를 기반으로 Spot 모델 신설 (slug, source, crewNote, externalPlace, category 확장)
-- [ ] **Route 모델**: RouteSpot 배열, 테마, 통계, 변형 연결을 포함한 Route 모델 신설
+- [ ] **Route 모델**: SpotLineSpot 배열, 테마, 통계, 변형 연결을 포함한 Route 모델 신설
 - [ ] **Place API 프록시**: 네이버 Place API + 카카오 Place API 검색/상세 조회 프록시 엔드포인트
 - [ ] **인메모리 캐싱**: Place API 응답 24h TTL 캐싱 (node-cache 또는 Map 기반)
 - [ ] **Spot CRUD API**: 생성, 조회(slug), 목록, 근처 검색, 대량 등록
@@ -84,7 +84,7 @@ Spotline 플랫폼의 경험 기반 소셜 구조(Spot/Route)를 지탱하는 **
 | ID | Requirement | Priority | Status |
 |----|-------------|----------|--------|
 | FR-01 | Spot 모델: slug, title, category(확장 10종), source(crew/user/qr), crewNote, externalPlace(naverPlaceId, kakaoPlaceId), location(GeoJSON), tags 지원 | High | Pending |
-| FR-02 | Route 모델: slug, title, theme(7종), spots(RouteSpot[] 순서 배열), totalDuration, area, creator, stats, parentRoute(변형 추적) | High | Pending |
+| FR-02 | Route 모델: slug, title, theme(7종), spots(SpotLineSpot[] 순서 배열), totalDuration, area, creator, stats, parentRoute(변형 추적) | High | Pending |
 | FR-03 | `GET /api/v2/places/search?query=&provider=naver|kakao` — Place API 검색 프록시 (크루 큐레이션 도구용) | High | Pending |
 | FR-04 | `GET /api/v2/places/:provider/:placeId` — Place API 상세 조회 + 24h 캐싱 | High | Pending |
 | FR-05 | `POST /api/v2/spots` — Spot 생성 (crew 큐레이션 / 추후 user) | High | Pending |
@@ -297,7 +297,7 @@ interface IRoute extends Document {
   description?: string;
   theme: RouteTheme;
   area: string;
-  spots: RouteSpot[];
+  spots: SpotLineSpot[];
   totalDuration: number;                // 분
   totalDistance: number;                 // 미터
   stats: { likes: number; saves: number; replications: number; completions: number };
@@ -308,7 +308,7 @@ interface IRoute extends Document {
   updatedAt: Date;
 }
 
-interface RouteSpot {
+interface SpotLineSpot {
   spot: Types.ObjectId;                 // Spot ref
   order: number;
   suggestedTime?: string;               // "17:30"

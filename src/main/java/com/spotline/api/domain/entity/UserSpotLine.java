@@ -8,26 +8,33 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "route_likes", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "route_id"})
+@Table(name = "user_spotlines", indexes = {
+    @Index(name = "idx_user_spotlines_user_id", columnList = "userId")
 })
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RouteLike {
+public class UserSpotLine {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @Column(name = "user_id", nullable = false)
+    @Column(nullable = false)
     private String userId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "route_id", nullable = false)
-    private Route route;
+    @JoinColumn(name = "spotline_id", nullable = false)
+    private SpotLine spotLine;
+
+    private String scheduledDate;
+
+    @Builder.Default
+    private String status = "scheduled";
+
+    private LocalDateTime completedAt;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

@@ -330,9 +330,9 @@ public class AnalyticsService {
 
     // 6. Route 조회수 증가
     @Transactional
-    public void incrementRouteView(UUID routeId) {
-        Route route = routeRepository.findById(routeId)
-            .orElseThrow(() -> new ResourceNotFoundException("Route", routeId.toString()));
+    public void incrementRouteView(UUID spotLineId) {
+        Route route = routeRepository.findById(spotLineId)
+            .orElseThrow(() -> new ResourceNotFoundException("Route", spotLineId.toString()));
         route.setViewsCount(route.getViewsCount() + 1);
         routeRepository.save(route);
     }
@@ -500,9 +500,9 @@ export async function incrementSpotView(spotId: string): Promise<void> {
   }
 }
 
-export async function incrementRouteView(routeId: string): Promise<void> {
+export async function incrementRouteView(spotLineId: string): Promise<void> {
   try {
-    await apiV2.post(`/routes/${routeId}/view`, null, { timeout: 3000 });
+    await apiV2.post(`/routes/${spotLineId}/view`, null, { timeout: 3000 });
   } catch {
     // fire-and-forget: 에러 무시
   }

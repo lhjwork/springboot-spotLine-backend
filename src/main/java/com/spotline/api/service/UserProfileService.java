@@ -1,7 +1,7 @@
 package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.User;
-import com.spotline.api.domain.repository.RouteSaveRepository;
+import com.spotline.api.domain.repository.SpotLineSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.AvatarUploadResponse;
@@ -22,7 +22,7 @@ public class UserProfileService {
     private final UserSyncService userSyncService;
     private final S3Service s3Service;
     private final SpotLikeRepository spotLikeRepository;
-    private final RouteSaveRepository routeSaveRepository;
+    private final SpotLineSaveRepository spotLineSaveRepository;
 
     private static final Set<String> ALLOWED_IMAGE_TYPES = Set.of(
         "image/jpeg", "image/png", "image/webp"
@@ -98,7 +98,7 @@ public class UserProfileService {
 
     private UserProfileResponse buildProfileResponse(User user) {
         int likedCount = (int) spotLikeRepository.countByUserId(user.getId());
-        int savedCount = (int) routeSaveRepository.countByUserId(user.getId());
+        int savedCount = (int) spotLineSaveRepository.countByUserId(user.getId());
         return UserProfileResponse.from(user, likedCount, savedCount);
     }
 

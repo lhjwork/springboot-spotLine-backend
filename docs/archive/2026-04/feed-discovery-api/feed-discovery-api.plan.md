@@ -79,7 +79,7 @@
 
 | ID | Requirement | Priority | Status |
 |----|-------------|----------|--------|
-| FR-01 | `GET /api/v2/spots/{spotId}/routes`: spotId로 해당 Spot이 포함된 활성 Route 목록 반환. `RoutePreview[]` 형태, `route_spots` 조인 테이블 활용, `likesCount DESC` 정렬, 최대 10개 | High | Pending |
+| FR-01 | `GET /api/v2/spots/{spotId}/routes`: spotId로 해당 Spot이 포함된 활성 Route 목록 반환. `RoutePreview[]` 형태, `spotline_spots` 조인 테이블 활용, `likesCount DESC` 정렬, 최대 10개 | High | Pending |
 | FR-02 | `GET /api/v2/spots`에 `sort` 쿼리 파라미터 지원: `popular`(viewsCount DESC), `newest`(createdAt DESC). 기본값 `popular` | High | Pending |
 | FR-03 | `RoutePreviewResponse`에 `coverImageUrl` 필드 추가. Route의 첫 번째 Spot(orderIndex=0)의 첫 미디어 URL을 사용. 미디어가 없으면 null | Medium | Pending |
 | FR-04 | `GET /api/v2/routes/popular`에 `sort` 쿼리 파라미터 지원: `popular`(likesCount DESC, 기존 동작), `newest`(createdAt DESC) | Medium | Pending |
@@ -120,7 +120,7 @@
 
 | Risk | Impact | Likelihood | Mitigation |
 |------|--------|------------|------------|
-| route_spots 조인 쿼리 성능 (Spot에 연결된 Route 다수) | Medium | Low | 최대 10개 제한 + 인덱스 확인 |
+| spotline_spots 조인 쿼리 성능 (Spot에 연결된 Route 다수) | Medium | Low | 최대 10개 제한 + 인덱스 확인 |
 | coverImageUrl을 위해 Route→Spot→Media 3단계 조인 필요 | Medium | Medium | Fetch Join 또는 서브쿼리로 N+1 방지 |
 | sort 파라미터 추가 시 기존 프론트엔드 동작 변경 | Low | Low | 기본값 `popular`로 설정하여 기존 동작 유지 |
 | Spot에 미디어가 없는 경우 coverImageUrl = null | Low | High (초기) | null 허용, 프론트에서 플레이스홀더 처리 (이미 구현됨) |

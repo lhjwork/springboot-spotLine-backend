@@ -137,7 +137,7 @@ public class RoutePreviewResponse {
 **설계 결정**:
 - `resolveCoverImageUrl`은 static private 메서드로 DTO 내에 위치 (Service 레이어 오염 방지)
 - thumbnail 우선 → 원본 폴백 (성능/대역폭 최적화)
-- Route→RouteSpot→Spot→SpotMedia 체인이므로 Fetch Join 필수 (N+1 방지)
+- Route→SpotLineSpot→Spot→SpotMedia 체인이므로 Fetch Join 필수 (N+1 방지)
 
 ---
 
@@ -163,7 +163,7 @@ Page<Route> findByAreaAndThemeAndIsActiveTrueOrderByCreatedAtDesc(
 ```
 
 **N+1 방지 전략 (FR-01)**:
-- `JOIN FETCH r.spots rs JOIN FETCH rs.spot s`로 Route→RouteSpot→Spot을 한 번에 로드
+- `JOIN FETCH r.spots rs JOIN FETCH rs.spot s`로 Route→SpotLineSpot→Spot을 한 번에 로드
 - coverImageUrl 계산을 위해 Spot.media/mediaItems도 필요하지만, `@ElementCollection(EAGER)` + `@OneToMany(LAZY)`이므로:
   - `media` (legacy): EAGER이므로 자동 로드
   - `mediaItems` (structured): LAZY이므로 별도 처리 필요
@@ -216,7 +216,7 @@ public List<RoutePreviewResponse> findRoutesBySpotId(UUID spotId) {
     spotRepository.findById(spotId)
             .orElseThrow(() -> new ResourceNotFoundException("Spot", spotId.toString()));
 
-    // 2. Route 조회 (Fetch Join으로 RouteSpot + Spot 포함)
+    // 2. Route 조회 (Fetch Join으로 SpotLineSpot + Spot 포함)
     List<Route> routes = routeRepository.findActiveRoutesBySpotId(spotId);
 
     // 3. 최대 10개 제한 + coverImageUrl 포함 변환
@@ -480,12 +480,12 @@ SpotService.findRoutesBySpotId(spotId)
   │
   ├── routeRepository.findActiveRoutesBySpotId(spotId)
   │   │ SQL: SELECT DISTINCT r.* FROM routes r
-  │   │      JOIN route_spots rs ON rs.route_id = r.id
+  │   │      JOIN spotline_spots rs ON rs.route_id = r.id
   │   │      JOIN spots s ON rs.spot_id = s.id
   │   │      WHERE s.id = ? AND r.is_active = true
   │   │      ORDER BY r.likes_count DESC
   │   ▼
-  │   List<Route> (with RouteSpot + Spot eagerly loaded)
+  │   List<Route> (with SpotLineSpot + Spot eagerly loaded)
   │
   ├── s3Service.getPublicUrl("") → s3BaseUrl
   │

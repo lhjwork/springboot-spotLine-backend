@@ -9,10 +9,10 @@ import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.MediaItemRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
-import com.spotline.api.domain.entity.Route;
-import com.spotline.api.domain.repository.RouteRepository;
+import com.spotline.api.domain.entity.SpotLine;
+import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.dto.response.DiscoverResponse;
-import com.spotline.api.dto.response.RoutePreviewResponse;
+import com.spotline.api.dto.response.SpotLinePreviewResponse;
 import com.spotline.api.dto.response.SlugResponse;
 import com.spotline.api.dto.response.SpotDetailResponse;
 import com.spotline.api.dto.response.SpotPartnerInfo;
@@ -40,7 +40,7 @@ import java.util.UUID;
 public class SpotService {
 
     private final SpotRepository spotRepository;
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
     private final PlaceApiService placeApiService;
     private final S3Service s3Service;
     private final PartnerService partnerService;
@@ -59,18 +59,18 @@ public class SpotService {
     }
 
     /**
-     * 특정 Spot이 포함된 활성 Route 프리뷰 목록 반환 (최대 10개)
+     * 특정 Spot이 포함된 활성 SpotLine 프리뷰 목록 반환 (최대 10개)
      */
-    public List<RoutePreviewResponse> findRoutesBySpotId(UUID spotId) {
+    public List<SpotLinePreviewResponse> findSpotLinesBySpotId(UUID spotId) {
         spotRepository.findById(spotId)
                 .orElseThrow(() -> new ResourceNotFoundException("Spot", spotId.toString()));
 
-        List<Route> routes = routeRepository.findActiveRoutesBySpotId(spotId);
+        List<SpotLine> spotLines = spotLineRepository.findActiveSpotLinesBySpotId(spotId);
 
         String s3BaseUrl = getS3BaseUrl();
-        return routes.stream()
+        return spotLines.stream()
                 .limit(10)
-                .map(route -> RoutePreviewResponse.from(route, s3BaseUrl))
+                .map(sl -> SpotLinePreviewResponse.from(sl, s3BaseUrl))
                 .toList();
     }
 
@@ -318,7 +318,7 @@ public class SpotService {
                 radiusKm, currentSpot.getId(), nextSpot != null ? nextSpot.getId() : null);
 
         // Step 4: Popular routes in the same area (up to 3)
-        List<RoutePreviewResponse> popularRoutes = findPopularRoutes(currentSpot.getArea());
+        List<SpotLinePreviewResponse> popularSpotLines = findPopularSpotLines(currentSpot.getArea());
 
         return DiscoverResponse.builder()
                 .currentSpot(DiscoverResponse.CurrentSpotInfo.builder()
@@ -328,7 +328,7 @@ public class SpotService {
                         .build())
                 .nextSpot(nextSpotInfo)
                 .nearbySpots(nearbySpots)
-                .popularRoutes(popularRoutes)
+                .popularSpotLines(popularSpotLines)
                 .area(currentSpot.getArea())
                 .locationGranted(true)
                 .build();
@@ -423,7 +423,7 @@ public class SpotService {
             return DiscoverResponse.builder()
                     .locationGranted(false)
                     .nearbySpots(List.of())
-                    .popularRoutes(List.of())
+                    .popularSpotLines(List.of())
                     .build();
         }
 
@@ -464,19 +464,19 @@ public class SpotService {
                         .build())
                 .nextSpot(nextSpotInfo)
                 .nearbySpots(nearby)
-                .popularRoutes(findPopularRoutes(topSpot.getArea()))
+                .popularSpotLines(findPopularSpotLines(topSpot.getArea()))
                 .area(topSpot.getArea())
                 .locationGranted(false)
                 .build();
     }
 
-    private List<RoutePreviewResponse> findPopularRoutes(String area) {
+    private List<SpotLinePreviewResponse> findPopularSpotLines(String area) {
         if (area == null) return List.of();
-        return routeRepository.findByAreaLikeAndPopular(
+        return spotLineRepository.findByAreaLikeAndPopular(
                         area, org.springframework.data.domain.PageRequest.of(0, 3))
                 .getContent()
                 .stream()
-                .map(RoutePreviewResponse::from)
+                .map(SpotLinePreviewResponse::from)
                 .toList();
     }
 

@@ -32,10 +32,10 @@ public class AnalyticsController {
         return ResponseEntity.ok(analyticsService.getPopularSpots());
     }
 
-    @Operation(summary = "인기 루트 순위")
-    @GetMapping("/api/v2/admin/analytics/popular-routes")
-    public ResponseEntity<List<PopularContentResponse>> getPopularRoutes() {
-        return ResponseEntity.ok(analyticsService.getPopularRoutes());
+    @Operation(summary = "인기 SpotLine 순위")
+    @GetMapping("/api/v2/admin/analytics/popular-spotlines")
+    public ResponseEntity<List<PopularContentResponse>> getPopularSpotLines() {
+        return ResponseEntity.ok(analyticsService.getPopularSpotLines());
     }
 
     @Operation(summary = "일별 콘텐츠 추이")
@@ -54,10 +54,10 @@ public class AnalyticsController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(summary = "루트 조회수 증가")
-    @PostMapping("/api/v2/routes/{id}/view")
-    public ResponseEntity<Void> incrementRouteView(@PathVariable UUID id) {
-        analyticsService.incrementRouteView(id);
+    @Operation(summary = "SpotLine 조회수 증가")
+    @PostMapping("/api/v2/spotlines/{id}/view")
+    public ResponseEntity<Void> incrementSpotLineView(@PathVariable UUID id) {
+        analyticsService.incrementSpotLineView(id);
         return ResponseEntity.ok().build();
     }
 }

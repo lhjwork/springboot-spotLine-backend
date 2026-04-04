@@ -9,9 +9,9 @@ import lombok.Data;
 @Builder
 public class PlatformStatsResponse {
     private long totalSpots;
-    private long totalRoutes;
+    private long totalSpotLines;
     private long totalComments;
     private long totalReports;
     private long totalSpotViews;
-    private long totalRouteViews;
+    private long totalSpotLineViews;
 }

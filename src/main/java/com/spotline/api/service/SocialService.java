@@ -19,11 +19,11 @@ import java.util.UUID;
 public class SocialService {
 
     private final SpotRepository spotRepository;
-    private final RouteRepository routeRepository;
+    private final SpotLineRepository spotLineRepository;
     private final SpotLikeRepository spotLikeRepository;
     private final SpotSaveRepository spotSaveRepository;
-    private final RouteLikeRepository routeLikeRepository;
-    private final RouteSaveRepository routeSaveRepository;
+    private final SpotLineLikeRepository spotLineLikeRepository;
+    private final SpotLineSaveRepository spotLineSaveRepository;
 
     public SocialToggleResponse toggleSpotLike(String userId, UUID spotId) {
         Spot spot = spotRepository.findById(spotId)
@@ -63,42 +63,42 @@ public class SocialService {
         return new SocialToggleResponse(null, saved, spot.getLikesCount(), spot.getSavesCount());
     }
 
-    public SocialToggleResponse toggleRouteLike(String userId, UUID routeId) {
-        Route route = routeRepository.findById(routeId)
+    public SocialToggleResponse toggleSpotLineLike(String userId, UUID spotLineId) {
+        SpotLine spotLine = spotLineRepository.findById(spotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Optional<RouteLike> existing = routeLikeRepository.findByUserIdAndRoute(userId, route);
+        Optional<SpotLineLike> existing = spotLineLikeRepository.findByUserIdAndSpotLine(userId, spotLine);
         boolean liked;
         if (existing.isPresent()) {
-            routeLikeRepository.delete(existing.get());
-            route.setLikesCount(Math.max(0, route.getLikesCount() - 1));
+            spotLineLikeRepository.delete(existing.get());
+            spotLine.setLikesCount(Math.max(0, spotLine.getLikesCount() - 1));
             liked = false;
         } else {
-            routeLikeRepository.save(RouteLike.builder().userId(userId).route(route).build());
-            route.setLikesCount(route.getLikesCount() + 1);
+            spotLineLikeRepository.save(SpotLineLike.builder().userId(userId).spotLine(spotLine).build());
+            spotLine.setLikesCount(spotLine.getLikesCount() + 1);
             liked = true;
         }
-        routeRepository.save(route);
-        return new SocialToggleResponse(liked, null, route.getLikesCount(), route.getSavesCount());
+        spotLineRepository.save(spotLine);
+        return new SocialToggleResponse(liked, null, spotLine.getLikesCount(), spotLine.getSavesCount());
     }
 
-    public SocialToggleResponse toggleRouteSave(String userId, UUID routeId) {
-        Route route = routeRepository.findById(routeId)
+    public SocialToggleResponse toggleSpotLineSave(String userId, UUID spotLineId) {
+        SpotLine spotLine = spotLineRepository.findById(spotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
-        Optional<RouteSave> existing = routeSaveRepository.findByUserIdAndRoute(userId, route);
+        Optional<SpotLineSave> existing = spotLineSaveRepository.findByUserIdAndSpotLine(userId, spotLine);
         boolean saved;
         if (existing.isPresent()) {
-            routeSaveRepository.delete(existing.get());
-            route.setSavesCount(Math.max(0, route.getSavesCount() - 1));
+            spotLineSaveRepository.delete(existing.get());
+            spotLine.setSavesCount(Math.max(0, spotLine.getSavesCount() - 1));
             saved = false;
         } else {
-            routeSaveRepository.save(RouteSave.builder().userId(userId).route(route).build());
-            route.setSavesCount(route.getSavesCount() + 1);
+            spotLineSaveRepository.save(SpotLineSave.builder().userId(userId).spotLine(spotLine).build());
+            spotLine.setSavesCount(spotLine.getSavesCount() + 1);
             saved = true;
         }
-        routeRepository.save(route);
-        return new SocialToggleResponse(null, saved, route.getLikesCount(), route.getSavesCount());
+        spotLineRepository.save(spotLine);
+        return new SocialToggleResponse(null, saved, spotLine.getLikesCount(), spotLine.getSavesCount());
     }
 
     @Transactional(readOnly = true)
@@ -112,12 +112,12 @@ public class SocialService {
     }
 
     @Transactional(readOnly = true)
-    public SocialStatusResponse getRouteSocialStatus(String userId, UUID routeId) {
-        Route route = routeRepository.findById(routeId)
+    public SocialStatusResponse getSpotLineSocialStatus(String userId, UUID spotLineId) {
+        SpotLine spotLine = spotLineRepository.findById(spotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return new SocialStatusResponse(
-            routeLikeRepository.existsByUserIdAndRoute(userId, route),
-            routeSaveRepository.existsByUserIdAndRoute(userId, route)
+            spotLineLikeRepository.existsByUserIdAndSpotLine(userId, spotLine),
+            spotLineSaveRepository.existsByUserIdAndSpotLine(userId, spotLine)
         );
     }
 }
