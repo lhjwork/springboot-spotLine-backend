@@ -37,6 +37,9 @@ public interface BlogRepository extends JpaRepository<Blog, UUID> {
     @Query("SELECT b.slug FROM Blog b WHERE b.status = 'PUBLISHED' AND b.isActive = true")
     List<String> findAllPublishedSlugs();
 
+    /** 팔로잉 피드 — 여러 유저의 공개 블로그 */
+    List<Blog> findByUserIdInAndStatusAndIsActiveTrueOrderByPublishedAtDesc(List<String> userIds, BlogStatus status);
+
     /** SpotLine별 블로그 수 */
     long countBySpotLineIdAndIsActiveTrue(UUID spotLineId);
 }

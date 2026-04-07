@@ -106,6 +106,8 @@ public interface SpotLineRepository extends JpaRepository<SpotLine, UUID> {
 
     Page<SpotLine> findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(String creatorId, Pageable pageable);
 
+    List<SpotLine> findByCreatorIdInAndIsActiveTrueOrderByCreatedAtDesc(List<String> creatorIds);
+
     boolean existsBySlug(String slug);
 
     @Query("SELECT s FROM SpotLine s WHERE s.isActive = true ORDER BY s.updatedAt DESC")
