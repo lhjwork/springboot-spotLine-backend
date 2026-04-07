@@ -44,4 +44,9 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    private Boolean suspended = false;
+
+    private LocalDateTime suspendedAt;
 }

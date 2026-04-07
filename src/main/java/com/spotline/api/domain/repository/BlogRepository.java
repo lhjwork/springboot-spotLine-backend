@@ -42,4 +42,6 @@ public interface BlogRepository extends JpaRepository<Blog, UUID> {
 
     /** SpotLine별 블로그 수 */
     long countBySpotLineIdAndIsActiveTrue(UUID spotLineId);
+
+    long countByUserId(String userId);
 }

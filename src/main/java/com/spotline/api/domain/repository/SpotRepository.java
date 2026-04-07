@@ -131,4 +131,6 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
     @Query("SELECT CAST(s.createdAt AS LocalDate) as date, COUNT(s) as cnt " +
            "FROM Spot s WHERE s.createdAt >= :since GROUP BY CAST(s.createdAt AS LocalDate)")
     List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
+
+    long countByCreatorId(String creatorId);
 }

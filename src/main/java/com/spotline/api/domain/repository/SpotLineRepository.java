@@ -125,4 +125,6 @@ public interface SpotLineRepository extends JpaRepository<SpotLine, UUID> {
     @Query("SELECT CAST(s.createdAt AS LocalDate) as date, COUNT(s) as cnt " +
            "FROM SpotLine s WHERE s.createdAt >= :since GROUP BY CAST(s.createdAt AS LocalDate)")
     List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
+
+    long countByCreatorId(String creatorId);
 }
