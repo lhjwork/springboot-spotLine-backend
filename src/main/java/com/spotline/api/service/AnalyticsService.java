@@ -1,7 +1,9 @@
 package com.spotline.api.service;
 
+import com.spotline.api.domain.entity.Blog;
 import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.Spot;
+import com.spotline.api.domain.repository.BlogRepository;
 import com.spotline.api.domain.repository.CommentRepository;
 import com.spotline.api.domain.repository.ContentReportRepository;
 import com.spotline.api.domain.repository.SpotLineRepository;
@@ -25,6 +27,7 @@ public class AnalyticsService {
 
     private final SpotRepository spotRepository;
     private final SpotLineRepository spotLineRepository;
+    private final BlogRepository blogRepository;
     private final CommentRepository commentRepository;
     private final ContentReportRepository contentReportRepository;
 
@@ -98,6 +101,14 @@ public class AnalyticsService {
                 .orElseThrow(() -> new ResourceNotFoundException("SpotLine", routeId.toString()));
         spotLine.setViewsCount(spotLine.getViewsCount() + 1);
         spotLineRepository.save(spotLine);
+    }
+
+    @Transactional
+    public void incrementBlogView(UUID blogId) {
+        Blog blog = blogRepository.findById(blogId)
+                .orElseThrow(() -> new ResourceNotFoundException("Blog", blogId.toString()));
+        blog.setViewsCount(blog.getViewsCount() + 1);
+        blogRepository.save(blog);
     }
 
     private Map<LocalDate, Long> toDateMap(List<Object[]> rows) {

@@ -40,7 +40,7 @@ public class SecurityConfig {
                         .requestMatchers("/h2-console/**").permitAll()
                         // Public — QR 스캔 로그 + 조회수 증가 (POST이지만 인증 불필요)
                         .requestMatchers(HttpMethod.POST, "/api/v2/qr/*/scan").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/v2/spots/*/view", "/api/v2/spotlines/*/view").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v2/spots/*/view", "/api/v2/spotlines/*/view", "/api/v2/blogs/*/view").permitAll()
                         // Admin 전용 — ROLE_ADMIN 필요
                         .requestMatchers("/api/v2/admin/**").hasRole("ADMIN")
                         // 인증 필요 — 쓰기 작업

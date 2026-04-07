@@ -60,4 +60,11 @@ public class AnalyticsController {
         analyticsService.incrementSpotLineView(id);
         return ResponseEntity.ok().build();
     }
+
+    @Operation(summary = "블로그 조회수 증가")
+    @PostMapping("/api/v2/blogs/{id}/view")
+    public ResponseEntity<Void> incrementBlogView(@PathVariable UUID id) {
+        analyticsService.incrementBlogView(id);
+        return ResponseEntity.ok().build();
+    }
 }
