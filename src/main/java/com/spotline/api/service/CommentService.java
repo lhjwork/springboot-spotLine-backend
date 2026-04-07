@@ -2,6 +2,7 @@ package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.Comment;
 import com.spotline.api.domain.enums.CommentTargetType;
+import com.spotline.api.domain.repository.BlogRepository;
 import com.spotline.api.domain.repository.CommentRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.domain.repository.SpotLineRepository;
@@ -26,6 +27,7 @@ public class CommentService {
     private final CommentRepository commentRepository;
     private final SpotRepository spotRepository;
     private final SpotLineRepository spotLineRepository;
+    private final BlogRepository blogRepository;
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> getComments(CommentTargetType targetType, UUID targetId, int page, int size) {
@@ -106,6 +108,7 @@ public class CommentService {
         boolean exists = switch (targetType) {
             case SPOT -> spotRepository.existsById(targetId);
             case SPOTLINE -> spotLineRepository.existsById(targetId);
+            case BLOG -> blogRepository.existsById(targetId);
         };
         if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다");
@@ -122,6 +125,7 @@ public class CommentService {
                 spotLine.setCommentsCount(Math.max(0, spotLine.getCommentsCount() + delta));
                 spotLineRepository.save(spotLine);
             });
+            case BLOG -> {} // Blog comment count tracked separately
         }
     }
 }

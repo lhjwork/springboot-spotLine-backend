@@ -1,5 +1,5 @@
 package com.spotline.api.domain.enums;
 
 public enum CommentTargetType {
-    SPOT, SPOTLINE
+    SPOT, SPOTLINE, BLOG
 }
