@@ -125,7 +125,10 @@ public class CommentService {
                 spotLine.setCommentsCount(Math.max(0, spotLine.getCommentsCount() + delta));
                 spotLineRepository.save(spotLine);
             });
-            case BLOG -> {} // Blog comment count tracked separately
+            case BLOG -> blogRepository.findById(targetId).ifPresent(blog -> {
+                blog.setCommentsCount(Math.max(0, blog.getCommentsCount() + delta));
+                blogRepository.save(blog);
+            });
         }
     }
 }

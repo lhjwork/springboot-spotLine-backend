@@ -27,6 +27,7 @@ public class BlogDetailResponse {
     private Integer viewsCount;
     private Integer likesCount;
     private Integer savesCount;
+    private Integer commentsCount;
     private LocalDateTime publishedAt;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -49,6 +50,7 @@ public class BlogDetailResponse {
                 .viewsCount(blog.getViewsCount())
                 .likesCount(blog.getLikesCount())
                 .savesCount(blog.getSavesCount())
+                .commentsCount(blog.getCommentsCount())
                 .publishedAt(blog.getPublishedAt())
                 .createdAt(blog.getCreatedAt())
                 .updatedAt(blog.getUpdatedAt())

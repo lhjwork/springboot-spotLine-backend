@@ -70,6 +70,8 @@ public class Blog {
     private Integer likesCount = 0;
     @Builder.Default
     private Integer savesCount = 0;
+    @Builder.Default
+    private Integer commentsCount = 0;
 
     private LocalDateTime publishedAt;
 

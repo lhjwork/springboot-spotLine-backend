@@ -24,6 +24,9 @@ public class SocialService {
     private final SpotSaveRepository spotSaveRepository;
     private final SpotLineLikeRepository spotLineLikeRepository;
     private final SpotLineSaveRepository spotLineSaveRepository;
+    private final BlogRepository blogRepository;
+    private final BlogLikeRepository blogLikeRepository;
+    private final BlogSaveRepository blogSaveRepository;
 
     public SocialToggleResponse toggleSpotLike(String userId, UUID spotId) {
         Spot spot = spotRepository.findById(spotId)
@@ -118,6 +121,56 @@ public class SocialService {
         return new SocialStatusResponse(
             spotLineLikeRepository.existsByUserIdAndSpotLine(userId, spotLine),
             spotLineSaveRepository.existsByUserIdAndSpotLine(userId, spotLine)
+        );
+    }
+
+    // ==================== Blog Social ====================
+
+    public SocialToggleResponse toggleBlogLike(String userId, UUID blogId) {
+        Blog blog = blogRepository.findById(blogId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Optional<BlogLike> existing = blogLikeRepository.findByUserIdAndBlog(userId, blog);
+        boolean liked;
+        if (existing.isPresent()) {
+            blogLikeRepository.delete(existing.get());
+            blog.setLikesCount(Math.max(0, blog.getLikesCount() - 1));
+            liked = false;
+        } else {
+            blogLikeRepository.save(BlogLike.builder().userId(userId).blog(blog).build());
+            blog.setLikesCount(blog.getLikesCount() + 1);
+            liked = true;
+        }
+        blogRepository.save(blog);
+        return new SocialToggleResponse(liked, null, blog.getLikesCount(), blog.getSavesCount());
+    }
+
+    public SocialToggleResponse toggleBlogSave(String userId, UUID blogId) {
+        Blog blog = blogRepository.findById(blogId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Optional<BlogSave> existing = blogSaveRepository.findByUserIdAndBlog(userId, blog);
+        boolean saved;
+        if (existing.isPresent()) {
+            blogSaveRepository.delete(existing.get());
+            blog.setSavesCount(Math.max(0, blog.getSavesCount() - 1));
+            saved = false;
+        } else {
+            blogSaveRepository.save(BlogSave.builder().userId(userId).blog(blog).build());
+            blog.setSavesCount(blog.getSavesCount() + 1);
+            saved = true;
+        }
+        blogRepository.save(blog);
+        return new SocialToggleResponse(null, saved, blog.getLikesCount(), blog.getSavesCount());
+    }
+
+    @Transactional(readOnly = true)
+    public SocialStatusResponse getBlogSocialStatus(String userId, UUID blogId) {
+        Blog blog = blogRepository.findById(blogId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        return new SocialStatusResponse(
+            blogLikeRepository.existsByUserIdAndBlog(userId, blog),
+            blogSaveRepository.existsByUserIdAndBlog(userId, blog)
         );
     }
 }

@@ -59,4 +59,24 @@ public class SocialController {
         if (userId == null) return new SocialStatusResponse(false, false);
         return socialService.getSpotLineSocialStatus(userId, id);
     }
+
+    @Operation(summary = "블로그 좋아요 토글")
+    @PostMapping("/blogs/{id}/like")
+    public SocialToggleResponse toggleBlogLike(@PathVariable UUID id) {
+        return socialService.toggleBlogLike(authUtil.requireUserId(), id);
+    }
+
+    @Operation(summary = "블로그 저장 토글")
+    @PostMapping("/blogs/{id}/save")
+    public SocialToggleResponse toggleBlogSave(@PathVariable UUID id) {
+        return socialService.toggleBlogSave(authUtil.requireUserId(), id);
+    }
+
+    @Operation(summary = "블로그 소셜 상태 조회")
+    @GetMapping("/blogs/{id}/social")
+    public SocialStatusResponse getBlogSocial(@PathVariable UUID id) {
+        String userId = authUtil.getCurrentUserId();
+        if (userId == null) return new SocialStatusResponse(false, false);
+        return socialService.getBlogSocialStatus(userId, id);
+    }
 }
