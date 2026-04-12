@@ -2,6 +2,7 @@ package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.UserSpotLine;
+import com.spotline.api.domain.enums.NotificationType;
 import com.spotline.api.domain.repository.SpotLineRepository;
 import com.spotline.api.domain.repository.UserSpotLineRepository;
 import com.spotline.api.dto.response.ReplicateSpotLineResponse;
@@ -23,6 +24,7 @@ public class UserSpotLineService {
 
     private final UserSpotLineRepository userSpotLineRepository;
     private final SpotLineRepository spotLineRepository;
+    private final NotificationService notificationService;
 
     public ReplicateSpotLineResponse replicate(String userId, UUID spotLineId, String scheduledDate) {
         SpotLine spotLine = spotLineRepository.findById(spotLineId)
@@ -37,6 +39,11 @@ public class UserSpotLineService {
 
         spotLine.setReplicationsCount(spotLine.getReplicationsCount() + 1);
         spotLineRepository.save(spotLine);
+
+        try {
+            notificationService.create(userId, spotLine.getCreatorId(), NotificationType.FORK,
+                "SPOTLINE", spotLineId.toString(), spotLine.getSlug());
+        } catch (Exception ignored) {}
 
         return ReplicateSpotLineResponse.from(userSpotLine, spotLine);
     }

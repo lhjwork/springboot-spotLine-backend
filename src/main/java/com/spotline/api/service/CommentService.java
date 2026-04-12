@@ -1,7 +1,11 @@
 package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.Comment;
+import com.spotline.api.domain.entity.Blog;
+import com.spotline.api.domain.entity.Spot;
+import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.enums.CommentTargetType;
+import com.spotline.api.domain.enums.NotificationType;
 import com.spotline.api.domain.repository.BlogRepository;
 import com.spotline.api.domain.repository.CommentRepository;
 import com.spotline.api.domain.repository.SpotRepository;
@@ -28,6 +32,7 @@ public class CommentService {
     private final SpotRepository spotRepository;
     private final SpotLineRepository spotLineRepository;
     private final BlogRepository blogRepository;
+    private final NotificationService notificationService;
 
     @Transactional(readOnly = true)
     public Page<CommentResponse> getComments(CommentTargetType targetType, UUID targetId, int page, int size) {
@@ -68,6 +73,16 @@ public class CommentService {
 
         Comment saved = commentRepository.save(builder.build());
         updateCommentsCount(request.getTargetType(), request.getTargetId(), 1);
+
+        try {
+            String ownerId = getTargetOwnerId(request.getTargetType(), request.getTargetId());
+            String slug = getTargetSlug(request.getTargetType(), request.getTargetId());
+            if (ownerId != null) {
+                notificationService.create(userId, ownerId, NotificationType.COMMENT,
+                    request.getTargetType().name(), request.getTargetId().toString(), slug);
+            }
+        } catch (Exception ignored) {}
+
         return CommentResponse.from(saved);
     }
 
@@ -113,6 +128,22 @@ public class CommentService {
         if (!exists) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND, "대상을 찾을 수 없습니다");
         }
+    }
+
+    private String getTargetOwnerId(CommentTargetType type, UUID targetId) {
+        return switch (type) {
+            case SPOT -> spotRepository.findById(targetId).map(Spot::getCreatorId).orElse(null);
+            case SPOTLINE -> spotLineRepository.findById(targetId).map(SpotLine::getCreatorId).orElse(null);
+            case BLOG -> blogRepository.findById(targetId).map(Blog::getUserId).orElse(null);
+        };
+    }
+
+    private String getTargetSlug(CommentTargetType type, UUID targetId) {
+        return switch (type) {
+            case SPOT -> spotRepository.findById(targetId).map(Spot::getSlug).orElse(null);
+            case SPOTLINE -> spotLineRepository.findById(targetId).map(SpotLine::getSlug).orElse(null);
+            case BLOG -> blogRepository.findById(targetId).map(Blog::getSlug).orElse(null);
+        };
     }
 
     private void updateCommentsCount(CommentTargetType targetType, UUID targetId, int delta) {

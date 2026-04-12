@@ -1,6 +1,7 @@
 package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.*;
+import com.spotline.api.domain.enums.NotificationType;
 import com.spotline.api.domain.repository.*;
 import com.spotline.api.dto.response.SocialStatusResponse;
 import com.spotline.api.dto.response.SocialToggleResponse;
@@ -27,6 +28,7 @@ public class SocialService {
     private final BlogRepository blogRepository;
     private final BlogLikeRepository blogLikeRepository;
     private final BlogSaveRepository blogSaveRepository;
+    private final NotificationService notificationService;
 
     public SocialToggleResponse toggleSpotLike(String userId, UUID spotId) {
         Spot spot = spotRepository.findById(spotId)
@@ -44,6 +46,12 @@ public class SocialService {
             liked = true;
         }
         spotRepository.save(spot);
+        if (liked && spot.getCreatorId() != null) {
+            try {
+                notificationService.create(userId, spot.getCreatorId(), NotificationType.SPOT_LIKE,
+                    "SPOT", spotId.toString(), spot.getSlug());
+            } catch (Exception ignored) {}
+        }
         return new SocialToggleResponse(liked, null, spot.getLikesCount(), spot.getSavesCount());
     }
 
@@ -82,6 +90,12 @@ public class SocialService {
             liked = true;
         }
         spotLineRepository.save(spotLine);
+        if (liked && spotLine.getCreatorId() != null) {
+            try {
+                notificationService.create(userId, spotLine.getCreatorId(), NotificationType.SPOTLINE_LIKE,
+                    "SPOTLINE", spotLineId.toString(), spotLine.getSlug());
+            } catch (Exception ignored) {}
+        }
         return new SocialToggleResponse(liked, null, spotLine.getLikesCount(), spotLine.getSavesCount());
     }
 
@@ -142,6 +156,12 @@ public class SocialService {
             liked = true;
         }
         blogRepository.save(blog);
+        if (liked && blog.getUserId() != null) {
+            try {
+                notificationService.create(userId, blog.getUserId(), NotificationType.BLOG_LIKE,
+                    "BLOG", blogId.toString(), blog.getSlug());
+            } catch (Exception ignored) {}
+        }
         return new SocialToggleResponse(liked, null, blog.getLikesCount(), blog.getSavesCount());
     }
 

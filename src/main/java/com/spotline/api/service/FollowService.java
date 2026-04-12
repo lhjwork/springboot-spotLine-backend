@@ -2,6 +2,7 @@ package com.spotline.api.service;
 
 import com.spotline.api.domain.entity.User;
 import com.spotline.api.domain.entity.UserFollow;
+import com.spotline.api.domain.enums.NotificationType;
 import com.spotline.api.domain.repository.UserFollowRepository;
 import com.spotline.api.domain.repository.UserRepository;
 import com.spotline.api.dto.response.FollowResponse;
@@ -20,6 +21,7 @@ public class FollowService {
 
     private final UserFollowRepository userFollowRepository;
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
     public FollowResponse follow(String followerId, String followingId) {
         if (followerId.equals(followingId)) {
@@ -40,6 +42,11 @@ public class FollowService {
         User follower = userRepository.findById(followerId).orElseThrow();
         follower.setFollowingCount(follower.getFollowingCount() + 1);
         userRepository.save(follower);
+
+        try {
+            notificationService.create(followerId, followingId, NotificationType.FOLLOW,
+                "USER", followingId, null);
+        } catch (Exception ignored) {}
 
         return new FollowResponse(true, following.getFollowersCount());
     }
