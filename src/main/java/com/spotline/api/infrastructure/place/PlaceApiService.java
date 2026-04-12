@@ -8,6 +8,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -177,6 +178,7 @@ public class PlaceApiService {
             }
 
             String businessHours = "";
+            List<PlaceInfo.DailyHour> dailyHours = new ArrayList<>();
             if (basicInfo.containsKey("openHour")) {
                 Map<String, Object> openHour = (Map<String, Object>) basicInfo.get("openHour");
                 if (openHour.containsKey("periodList")) {
@@ -186,8 +188,41 @@ public class PlaceApiService {
                         if (!times.isEmpty()) {
                             businessHours = String.valueOf(times.get(0).getOrDefault("timeSE", ""));
                         }
+                        for (Map<String, Object> time : times) {
+                            dailyHours.add(PlaceInfo.DailyHour.builder()
+                                    .day(String.valueOf(time.getOrDefault("timeName", "")))
+                                    .timeSE(String.valueOf(time.getOrDefault("timeSE", "")))
+                                    .build());
+                        }
                     }
                 }
+            }
+
+            // 메뉴 목록
+            List<PlaceInfo.MenuItem> menuItems = Collections.emptyList();
+            if (result.containsKey("menuInfo") && result.get("menuInfo") instanceof Map) {
+                Map<String, Object> menuInfo = (Map<String, Object>) result.get("menuInfo");
+                if (menuInfo.containsKey("menuList")) {
+                    List<Map<String, Object>> menuList = (List<Map<String, Object>>) menuInfo.get("menuList");
+                    menuItems = menuList.stream()
+                            .limit(10)
+                            .map(m -> PlaceInfo.MenuItem.builder()
+                                    .name(String.valueOf(m.getOrDefault("menu", "")))
+                                    .price(String.valueOf(m.getOrDefault("price", "")))
+                                    .photo(m.containsKey("img") ? String.valueOf(m.get("img")) : null)
+                                    .build())
+                            .toList();
+                }
+            }
+
+            // 편의시설
+            List<String> facilities = Collections.emptyList();
+            if (basicInfo.containsKey("facilityInfo")) {
+                Map<String, Object> facilityInfo = (Map<String, Object>) basicInfo.get("facilityInfo");
+                facilities = facilityInfo.entrySet().stream()
+                        .filter(e -> "Y".equals(String.valueOf(e.getValue())))
+                        .map(Map.Entry::getKey)
+                        .toList();
             }
 
             // 사진 목록
@@ -212,6 +247,9 @@ public class PlaceApiService {
                     .phone(phone)
                     .category(category)
                     .businessHours(businessHours)
+                    .dailyHours(dailyHours.isEmpty() ? null : dailyHours)
+                    .menuItems(menuItems.isEmpty() ? null : menuItems)
+                    .facilities(facilities.isEmpty() ? null : facilities)
                     .photos(photos)
                     .url("https://place.map.kakao.com/" + placeId)
                     .build();
