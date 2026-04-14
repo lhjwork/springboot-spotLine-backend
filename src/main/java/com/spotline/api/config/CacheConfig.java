@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.support.CompositeCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -22,11 +23,21 @@ public class CacheConfig {
 
     @Bean
     public CacheManager cacheManager() {
-        CaffeineCacheManager cacheManager = new CaffeineCacheManager("placeInfo");
-        cacheManager.setCaffeine(Caffeine.newBuilder()
+        CaffeineCacheManager placeCacheManager = new CaffeineCacheManager("placeInfo");
+        placeCacheManager.setCaffeine(Caffeine.newBuilder()
                 .maximumSize(maxSize)
                 .expireAfterWrite(ttlHours, TimeUnit.HOURS)
                 .recordStats());
-        return cacheManager;
+
+        CaffeineCacheManager analyticsCacheManager = new CaffeineCacheManager(
+                "analyticsContentPerf", "analyticsCreatorProd", "analyticsAreaPerf", "analyticsPeriodComp");
+        analyticsCacheManager.setCaffeine(Caffeine.newBuilder()
+                .maximumSize(100)
+                .expireAfterWrite(10, TimeUnit.MINUTES)
+                .recordStats());
+
+        CompositeCacheManager composite = new CompositeCacheManager();
+        composite.setCacheManagers(java.util.List.of(placeCacheManager, analyticsCacheManager));
+        return composite;
     }
 }

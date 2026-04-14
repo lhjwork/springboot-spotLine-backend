@@ -89,6 +89,24 @@
 - Beneficial extras: 5 extra request DTO @Schema + 5 extra response DTO @Schema
 - Analysis at: docs/03-analysis/backend-api-docs.analysis.md
 
+## Blog SEO & View Tracking Analysis History
+- Feature: blog-seo-tracking (cross-repo: backend + front-spotLine)
+- v0.1 (2026-04-07): Match Rate **100%** -- 0 missing, 2 minor beneficial deviations, 1 beneficial extra
+- 6/6 FRs implemented: backend endpoint+service+security, frontend api+ViewTracker+page+sitemap
+- 5 files changed across 2 repos (2 backend + 3 frontend, design expected 7 but 2 unnecessary)
+- Deviations: AnalyticsService used instead of BlogService (matches existing pattern), no custom @Query needed
+- Beneficial extra: Blog existence validation via findById+orElseThrow
+- Design doc at: front-spotLine/docs/02-design/features/blog-seo-tracking.design.md
+- Analysis at: docs/03-analysis/blog-seo-tracking.analysis.md
+
+## Blog Social Actions Analysis History
+- Feature: blog-social-actions (cross-repo: backend + front-spotLine)
+- v0.1 (2026-04-07): Match Rate **100%** -- 0 missing, 5 minor beneficial deviations, 0 extras
+- 16/16 checklist items: 2 entities, 2 repos, 3 service methods, 3 controller endpoints, 2 DTO mods, 1 entity mod, 1 comment service mod, 1 new component, 4 frontend file mods
+- 4 new files + 11 modified files across 2 repos, 3 API endpoints
+- Deviations: CommentService delta vs recount, param order, ResponseEntity vs direct, null-check location, Fragment wrapper
+- Analysis at: front-spotLine/docs/03-analysis/blog-social-actions.analysis.md
+
 ## Architecture Pattern
 - Layers: controller/ -> service/ -> domain/(entity, enums, repository) + infrastructure/place/
 - DTOs: dto/request/ + dto/response/ (separate from domain)

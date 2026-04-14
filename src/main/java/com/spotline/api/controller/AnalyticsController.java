@@ -1,15 +1,15 @@
 package com.spotline.api.controller;
 
-import com.spotline.api.dto.response.DailyContentTrendResponse;
-import com.spotline.api.dto.response.PlatformStatsResponse;
-import com.spotline.api.dto.response.PopularContentResponse;
+import com.spotline.api.dto.response.*;
 import com.spotline.api.service.AnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,6 +43,55 @@ public class AnalyticsController {
     public ResponseEntity<List<DailyContentTrendResponse>> getDailyTrend(
             @RequestParam(defaultValue = "30") int days) {
         return ResponseEntity.ok(analyticsService.getDailyTrend(days));
+    }
+
+    // ---- BI Analytics ----
+
+    @Operation(summary = "콘텐츠 퍼포먼스")
+    @GetMapping("/api/v2/admin/analytics/content-performance")
+    public ResponseEntity<List<ContentPerformanceResponse>> getContentPerformance(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(defaultValue = "spot") String type,
+            @RequestParam(defaultValue = "views") String sort,
+            @RequestParam(defaultValue = "50") int limit) {
+        LocalDate now = LocalDate.now();
+        if (from == null) from = now.minusDays(30);
+        if (to == null) to = now;
+        return ResponseEntity.ok(analyticsService.getContentPerformance(from, to, type, sort, limit));
+    }
+
+    @Operation(summary = "크리에이터 생산성")
+    @GetMapping("/api/v2/admin/analytics/creator-productivity")
+    public ResponseEntity<List<CreatorProductivityResponse>> getCreatorProductivity(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        LocalDate now = LocalDate.now();
+        if (from == null) from = now.minusDays(30);
+        if (to == null) to = now;
+        return ResponseEntity.ok(analyticsService.getCreatorProductivity(from, to));
+    }
+
+    @Operation(summary = "지역별 성과")
+    @GetMapping("/api/v2/admin/analytics/area-performance")
+    public ResponseEntity<List<AreaPerformanceResponse>> getAreaPerformance(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        LocalDate now = LocalDate.now();
+        if (from == null) from = now.minusDays(30);
+        if (to == null) to = now;
+        return ResponseEntity.ok(analyticsService.getAreaPerformance(from, to));
+    }
+
+    @Operation(summary = "기간 비교")
+    @GetMapping("/api/v2/admin/analytics/period-comparison")
+    public ResponseEntity<PeriodComparisonResponse> getPeriodComparison(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
+        LocalDate now = LocalDate.now();
+        if (from == null) from = now.minusDays(30);
+        if (to == null) to = now;
+        return ResponseEntity.ok(analyticsService.getPeriodComparison(from, to));
     }
 
     // ---- Public View Count (permitAll via SecurityConfig) ----

@@ -133,4 +133,27 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
     List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
 
     long countByCreatorId(String creatorId);
+
+    // ---- BI Analytics ----
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to ORDER BY s.viewsCount DESC")
+    List<Spot> findActiveByDateRangeOrderByViews(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to ORDER BY s.likesCount DESC")
+    List<Spot> findActiveByDateRangeOrderByLikes(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to ORDER BY s.savesCount DESC")
+    List<Spot> findActiveByDateRangeOrderBySaves(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to ORDER BY s.commentsCount DESC")
+    List<Spot> findActiveByDateRangeOrderByComments(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT s.area, COUNT(s), SUM(s.viewsCount), SUM(s.likesCount) FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to GROUP BY s.area")
+    List<Object[]> aggregateByArea(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT s.creatorId, s.creatorName, s.creatorType, COUNT(s), SUM(s.viewsCount), SUM(s.likesCount) FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to GROUP BY s.creatorId, s.creatorName, s.creatorType")
+    List<Object[]> aggregateByCreator(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT COUNT(s), COALESCE(SUM(s.viewsCount),0), COALESCE(SUM(s.likesCount),0) FROM Spot s WHERE s.isActive = true AND s.createdAt BETWEEN :from AND :to")
+    Object[] aggregateStats(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }

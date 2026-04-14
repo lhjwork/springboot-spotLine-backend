@@ -127,4 +127,27 @@ public interface SpotLineRepository extends JpaRepository<SpotLine, UUID> {
     List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
 
     long countByCreatorId(String creatorId);
+
+    // ---- BI Analytics ----
+
+    @Query("SELECT sl FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to ORDER BY sl.viewsCount DESC")
+    List<SpotLine> findActiveByDateRangeOrderByViews(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT sl FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to ORDER BY sl.likesCount DESC")
+    List<SpotLine> findActiveByDateRangeOrderByLikes(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT sl FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to ORDER BY sl.savesCount DESC")
+    List<SpotLine> findActiveByDateRangeOrderBySaves(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT sl FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to ORDER BY sl.commentsCount DESC")
+    List<SpotLine> findActiveByDateRangeOrderByComments(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("SELECT sl.area, COUNT(sl), SUM(sl.viewsCount), SUM(sl.likesCount) FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to GROUP BY sl.area")
+    List<Object[]> aggregateByArea(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT sl.creatorId, sl.creatorName, sl.creatorType, COUNT(sl), SUM(sl.viewsCount), SUM(sl.likesCount) FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to GROUP BY sl.creatorId, sl.creatorName, sl.creatorType")
+    List<Object[]> aggregateByCreator(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
+
+    @Query("SELECT COUNT(sl), COALESCE(SUM(sl.viewsCount),0), COALESCE(SUM(sl.likesCount),0) FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to")
+    Object[] aggregateStats(@Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 }
