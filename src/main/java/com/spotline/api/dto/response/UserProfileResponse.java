@@ -28,7 +28,7 @@ public class UserProfileResponse {
         private int following;
     }
 
-    public static UserProfileResponse from(User user, int likedCount, int savedCount) {
+    public static UserProfileResponse from(User user, int likedCount, int savedCount, int visitedCount) {
         return UserProfileResponse.builder()
             .id(user.getId())
             .nickname(user.getNickname())
@@ -37,7 +37,7 @@ public class UserProfileResponse {
             .joinedAt(user.getCreatedAt() != null ? user.getCreatedAt().toString() : null)
             .instagramId(user.getInstagramId())
             .stats(UserStatsResponse.builder()
-                .visited(0)
+                .visited(visitedCount)
                 .liked(likedCount)
                 .recommended(0)
                 .spotlines(savedCount)

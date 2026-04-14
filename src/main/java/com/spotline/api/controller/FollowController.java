@@ -48,7 +48,7 @@ public class FollowController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return followService.getFollowers(userId, PageRequest.of(page, size))
-            .map(user -> UserProfileResponse.from(user, 0, 0));
+            .map(user -> UserProfileResponse.from(user, 0, 0, 0));
     }
 
     @Operation(summary = "팔로잉 목록")
@@ -58,6 +58,6 @@ public class FollowController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return followService.getFollowing(userId, PageRequest.of(page, size))
-            .map(user -> UserProfileResponse.from(user, 0, 0));
+            .map(user -> UserProfileResponse.from(user, 0, 0, 0));
     }
 }

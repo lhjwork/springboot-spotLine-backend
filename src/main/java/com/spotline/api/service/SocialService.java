@@ -23,6 +23,7 @@ public class SocialService {
     private final SpotLineRepository spotLineRepository;
     private final SpotLikeRepository spotLikeRepository;
     private final SpotSaveRepository spotSaveRepository;
+    private final SpotVisitRepository spotVisitRepository;
     private final SpotLineLikeRepository spotLineLikeRepository;
     private final SpotLineSaveRepository spotLineSaveRepository;
     private final BlogRepository blogRepository;
@@ -52,7 +53,7 @@ public class SocialService {
                     "SPOT", spotId.toString(), spot.getSlug());
             } catch (Exception ignored) {}
         }
-        return new SocialToggleResponse(liked, null, spot.getLikesCount(), spot.getSavesCount());
+        return new SocialToggleResponse(liked, null, null, spot.getLikesCount(), spot.getSavesCount(), spot.getVisitedCount());
     }
 
     public SocialToggleResponse toggleSpotSave(String userId, UUID spotId) {
@@ -71,7 +72,26 @@ public class SocialService {
             saved = true;
         }
         spotRepository.save(spot);
-        return new SocialToggleResponse(null, saved, spot.getLikesCount(), spot.getSavesCount());
+        return new SocialToggleResponse(null, saved, null, spot.getLikesCount(), spot.getSavesCount(), spot.getVisitedCount());
+    }
+
+    public SocialToggleResponse toggleSpotVisit(String userId, UUID spotId) {
+        Spot spot = spotRepository.findById(spotId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+
+        Optional<SpotVisit> existing = spotVisitRepository.findByUserIdAndSpot(userId, spot);
+        boolean visited;
+        if (existing.isPresent()) {
+            spotVisitRepository.delete(existing.get());
+            spot.setVisitedCount(Math.max(0, spot.getVisitedCount() - 1));
+            visited = false;
+        } else {
+            spotVisitRepository.save(SpotVisit.builder().userId(userId).spot(spot).build());
+            spot.setVisitedCount(spot.getVisitedCount() + 1);
+            visited = true;
+        }
+        spotRepository.save(spot);
+        return new SocialToggleResponse(null, null, visited, spot.getLikesCount(), spot.getSavesCount(), spot.getVisitedCount());
     }
 
     public SocialToggleResponse toggleSpotLineLike(String userId, UUID spotLineId) {
@@ -96,7 +116,7 @@ public class SocialService {
                     "SPOTLINE", spotLineId.toString(), spotLine.getSlug());
             } catch (Exception ignored) {}
         }
-        return new SocialToggleResponse(liked, null, spotLine.getLikesCount(), spotLine.getSavesCount());
+        return new SocialToggleResponse(liked, null, null, spotLine.getLikesCount(), spotLine.getSavesCount(), null);
     }
 
     public SocialToggleResponse toggleSpotLineSave(String userId, UUID spotLineId) {
@@ -115,7 +135,7 @@ public class SocialService {
             saved = true;
         }
         spotLineRepository.save(spotLine);
-        return new SocialToggleResponse(null, saved, spotLine.getLikesCount(), spotLine.getSavesCount());
+        return new SocialToggleResponse(null, saved, null, spotLine.getLikesCount(), spotLine.getSavesCount(), null);
     }
 
     @Transactional(readOnly = true)
@@ -124,7 +144,8 @@ public class SocialService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return new SocialStatusResponse(
             spotLikeRepository.existsByUserIdAndSpot(userId, spot),
-            spotSaveRepository.existsByUserIdAndSpot(userId, spot)
+            spotSaveRepository.existsByUserIdAndSpot(userId, spot),
+            spotVisitRepository.existsByUserIdAndSpot(userId, spot)
         );
     }
 
@@ -134,7 +155,8 @@ public class SocialService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return new SocialStatusResponse(
             spotLineLikeRepository.existsByUserIdAndSpotLine(userId, spotLine),
-            spotLineSaveRepository.existsByUserIdAndSpotLine(userId, spotLine)
+            spotLineSaveRepository.existsByUserIdAndSpotLine(userId, spotLine),
+            false
         );
     }
 
@@ -162,7 +184,7 @@ public class SocialService {
                     "BLOG", blogId.toString(), blog.getSlug());
             } catch (Exception ignored) {}
         }
-        return new SocialToggleResponse(liked, null, blog.getLikesCount(), blog.getSavesCount());
+        return new SocialToggleResponse(liked, null, null, blog.getLikesCount(), blog.getSavesCount(), null);
     }
 
     public SocialToggleResponse toggleBlogSave(String userId, UUID blogId) {
@@ -181,7 +203,7 @@ public class SocialService {
             saved = true;
         }
         blogRepository.save(blog);
-        return new SocialToggleResponse(null, saved, blog.getLikesCount(), blog.getSavesCount());
+        return new SocialToggleResponse(null, saved, null, blog.getLikesCount(), blog.getSavesCount(), null);
     }
 
     @Transactional(readOnly = true)
@@ -190,7 +212,8 @@ public class SocialService {
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return new SocialStatusResponse(
             blogLikeRepository.existsByUserIdAndBlog(userId, blog),
-            blogSaveRepository.existsByUserIdAndBlog(userId, blog)
+            blogSaveRepository.existsByUserIdAndBlog(userId, blog),
+            false
         );
     }
 }

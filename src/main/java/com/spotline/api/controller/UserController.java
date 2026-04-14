@@ -8,6 +8,7 @@ import com.spotline.api.domain.repository.SpotLineSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.domain.repository.SpotSaveRepository;
+import com.spotline.api.domain.repository.SpotVisitRepository;
 import com.spotline.api.domain.repository.UserRepository;
 import com.spotline.api.dto.request.AvatarUploadRequest;
 import com.spotline.api.dto.request.UpdateProfileRequest;
@@ -38,6 +39,7 @@ public class UserController {
     private final SpotLineSaveRepository spotLineSaveRepository;
     private final SpotRepository spotRepository;
     private final SpotLineRepository spotLineRepository;
+    private final SpotVisitRepository spotVisitRepository;
     private final UserProfileService userProfileService;
 
     @Operation(summary = "내 프로필 수정")
@@ -95,7 +97,7 @@ public class UserController {
     public UserProfileResponse getProfile(@PathVariable String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"));
-        return UserProfileResponse.from(user, 0, 0);
+        return UserProfileResponse.from(user, 0, 0, 0);
     }
 
     @Operation(summary = "사용자 좋아요 스팟")
@@ -116,6 +118,16 @@ public class UserController {
             @RequestParam(defaultValue = "12") int size) {
         return spotLineSaveRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
             .map(rs -> SpotLinePreviewResponse.from(rs.getSpotLine()));
+    }
+
+    @Operation(summary = "사용자 방문 스팟")
+    @GetMapping("/{userId}/visited-spots")
+    public Page<SpotDetailResponse> getVisitedSpots(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        return spotVisitRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
+            .map(sv -> SpotDetailResponse.from(sv.getSpot(), null));
     }
 
     @Operation(summary = "내 저장 목록")

@@ -10,6 +10,8 @@ import lombok.Data;
 public class SocialToggleResponse {
     private Boolean liked;
     private Boolean saved;
+    private Boolean visited;
     private Integer likesCount;
     private Integer savesCount;
+    private Integer visitedCount;
 }

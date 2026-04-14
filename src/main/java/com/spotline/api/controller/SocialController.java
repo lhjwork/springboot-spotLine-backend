@@ -32,6 +32,12 @@ public class SocialController {
         return socialService.toggleSpotSave(authUtil.requireUserId(), id);
     }
 
+    @Operation(summary = "스팟 방문 체크인 토글")
+    @PostMapping("/spots/{id}/visit")
+    public SocialToggleResponse toggleSpotVisit(@PathVariable UUID id) {
+        return socialService.toggleSpotVisit(authUtil.requireUserId(), id);
+    }
+
     @Operation(summary = "SpotLine 좋아요 토글")
     @PostMapping("/spotlines/{id}/like")
     public SocialToggleResponse toggleSpotLineLike(@PathVariable UUID id) {
@@ -48,7 +54,7 @@ public class SocialController {
     @GetMapping("/spots/{id}/social")
     public SocialStatusResponse getSpotSocial(@PathVariable UUID id) {
         String userId = authUtil.getCurrentUserId();
-        if (userId == null) return new SocialStatusResponse(false, false);
+        if (userId == null) return new SocialStatusResponse(false, false, false);
         return socialService.getSpotSocialStatus(userId, id);
     }
 
@@ -56,7 +62,7 @@ public class SocialController {
     @GetMapping("/spotlines/{id}/social")
     public SocialStatusResponse getSpotLineSocial(@PathVariable UUID id) {
         String userId = authUtil.getCurrentUserId();
-        if (userId == null) return new SocialStatusResponse(false, false);
+        if (userId == null) return new SocialStatusResponse(false, false, false);
         return socialService.getSpotLineSocialStatus(userId, id);
     }
 
@@ -76,7 +82,7 @@ public class SocialController {
     @GetMapping("/blogs/{id}/social")
     public SocialStatusResponse getBlogSocial(@PathVariable UUID id) {
         String userId = authUtil.getCurrentUserId();
-        if (userId == null) return new SocialStatusResponse(false, false);
+        if (userId == null) return new SocialStatusResponse(false, false, false);
         return socialService.getBlogSocialStatus(userId, id);
     }
 }

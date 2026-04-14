@@ -121,6 +121,8 @@ public class Spot {
     private Integer viewsCount = 0;
     @Builder.Default
     private Integer commentsCount = 0;
+    @Builder.Default
+    private Integer visitedCount = 0;
 
     // ---- Creator ----
     @Column(nullable = false)

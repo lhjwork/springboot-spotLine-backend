@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
-@Schema(description = "소셜 상태 응답 (좋아요/저장)")
+@Schema(description = "소셜 상태 응답 (좋아요/저장/방문)")
 @Data
 @AllArgsConstructor
 public class SocialStatusResponse {
@@ -15,4 +15,7 @@ public class SocialStatusResponse {
 
     @JsonProperty("isSaved")
     private boolean saved;
+
+    @JsonProperty("isVisited")
+    private boolean visited;
 }
