@@ -8,9 +8,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
-@Table(name = "spot_visits", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"user_id", "spot_id"})
-})
+@Table(name = "spot_visits")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -28,6 +26,13 @@ public class SpotVisit {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "spot_id", nullable = false)
     private Spot spot;
+
+    @Column(length = 100)
+    private String memo;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private Boolean verified = false;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
