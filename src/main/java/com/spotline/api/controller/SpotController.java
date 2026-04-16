@@ -1,7 +1,9 @@
 package com.spotline.api.controller;
 
 import com.spotline.api.domain.enums.FeedSort;
+import com.spotline.api.domain.enums.SpotStatus;
 import com.spotline.api.dto.request.CreateSpotRequest;
+import com.spotline.api.dto.request.RejectSpotRequest;
 import com.spotline.api.dto.request.UpdateSpotRequest;
 import com.spotline.api.dto.response.DiscoverResponse;
 import com.spotline.api.dto.response.SpotLinePreviewResponse;
@@ -45,6 +47,45 @@ public class SpotController {
             return ResponseEntity.ok(spotService.discover(37.5665, 126.9780, radius, excludeSpotId)); // Seoul center
         }
         return ResponseEntity.ok(spotService.discover(lat, lng, radius, excludeSpotId));
+    }
+
+    @Operation(summary = "내 스팟 목록")
+    @GetMapping("/my")
+    public ResponseEntity<Page<SpotDetailResponse>> mySpots(
+            @RequestParam(required = false) String status,
+            @PageableDefault(size = 20) Pageable pageable) {
+        String userId = authUtil.requireUserId();
+        SpotStatus spotStatus = parseSpotStatus(status);
+        return ResponseEntity.ok(spotService.getMySpots(userId, spotStatus, pageable));
+    }
+
+    @Operation(summary = "검토 대기 스팟 목록 (어드민)")
+    @GetMapping("/pending")
+    public ResponseEntity<Page<SpotDetailResponse>> pendingSpots(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(spotService.getPendingSpots(pageable));
+    }
+
+    @Operation(summary = "검토 대기 스팟 수")
+    @GetMapping("/pending/count")
+    public ResponseEntity<Long> pendingCount() {
+        return ResponseEntity.ok(spotService.countPending());
+    }
+
+    @Operation(summary = "스팟 승인 (어드민)")
+    @PutMapping("/{slug}/approve")
+    public ResponseEntity<SpotDetailResponse> approve(@PathVariable String slug) {
+        String adminId = authUtil.requireUserId();
+        return ResponseEntity.ok(spotService.approve(slug, adminId));
+    }
+
+    @Operation(summary = "스팟 반려 (어드민)")
+    @PutMapping("/{slug}/reject")
+    public ResponseEntity<SpotDetailResponse> reject(
+            @PathVariable String slug,
+            @Valid @RequestBody RejectSpotRequest request) {
+        String adminId = authUtil.requireUserId();
+        return ResponseEntity.ok(spotService.reject(slug, request.getReason(), adminId));
     }
 
     @Operation(summary = "스팟 상세 조회 (slug)")
@@ -115,6 +156,15 @@ public class SpotController {
     public ResponseEntity<List<SpotDetailResponse>> bulkCreate(
             @Valid @RequestBody @Size(max = 50, message = "한 번에 최대 50개까지 등록 가능합니다") List<CreateSpotRequest> requests) {
         return ResponseEntity.status(HttpStatus.CREATED).body(spotService.bulkCreate(requests));
+    }
+
+    private SpotStatus parseSpotStatus(String status) {
+        if (status == null) return null;
+        try {
+            return SpotStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 
     private FeedSort parseFeedSort(String sort) {

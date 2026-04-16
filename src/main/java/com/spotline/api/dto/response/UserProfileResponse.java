@@ -24,11 +24,19 @@ public class UserProfileResponse {
         private int liked;
         private int recommended;
         private int spotlines;
+        private int spotsCount;
+        private int spotLinesCount;
+        private int blogsCount;
         private int followers;
         private int following;
     }
 
     public static UserProfileResponse from(User user, int likedCount, int savedCount, int visitedCount) {
+        return from(user, likedCount, savedCount, visitedCount, 0, 0, 0);
+    }
+
+    public static UserProfileResponse from(User user, int likedCount, int savedCount, int visitedCount,
+                                             int spotsCount, int spotLinesCount, int blogsCount) {
         return UserProfileResponse.builder()
             .id(user.getId())
             .nickname(user.getNickname())
@@ -41,6 +49,9 @@ public class UserProfileResponse {
                 .liked(likedCount)
                 .recommended(0)
                 .spotlines(savedCount)
+                .spotsCount(spotsCount)
+                .spotLinesCount(spotLinesCount)
+                .blogsCount(blogsCount)
                 .followers(user.getFollowersCount())
                 .following(user.getFollowingCount())
                 .build())

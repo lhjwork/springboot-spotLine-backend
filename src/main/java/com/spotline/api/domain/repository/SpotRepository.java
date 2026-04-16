@@ -2,6 +2,7 @@ package com.spotline.api.domain.repository;
 
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.enums.SpotCategory;
+import com.spotline.api.domain.enums.SpotStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,75 +18,74 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
 
     Optional<Spot> findBySlugAndIsActiveTrue(String slug);
 
-    // ---- 기존 (무정렬) ----
-    Page<Spot> findByIsActiveTrue(Pageable pageable);
+    // ---- Public queries (APPROVED or legacy NULL status) ----
 
-    Page<Spot> findByCategoryAndIsActiveTrue(SpotCategory category, Pageable pageable);
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) ORDER BY s.viewsCount DESC")
+    Page<Spot> findApprovedOrderByViewsCountDesc(Pageable pageable);
 
-    // ---- Area 필터: LIKE 매칭 (연남 → 연남, 연남동 모두 매칭) ----
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% ORDER BY s.viewsCount DESC")
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.category = :category ORDER BY s.viewsCount DESC")
+    Page<Spot> findApprovedByCategoryOrderByViewsCountDesc(@Param("category") SpotCategory category, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) ORDER BY s.createdAt DESC")
+    Page<Spot> findApprovedOrderByCreatedAtDesc(Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.category = :category ORDER BY s.createdAt DESC")
+    Page<Spot> findApprovedByCategoryOrderByCreatedAtDesc(@Param("category") SpotCategory category, Pageable pageable);
+
+    // ---- Area filter: LIKE matching ----
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.area LIKE %:area% ORDER BY s.viewsCount DESC")
     Page<Spot> findByAreaLikeAndPopular(@Param("area") String area, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% AND s.category = :category ORDER BY s.viewsCount DESC")
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.area LIKE %:area% AND s.category = :category ORDER BY s.viewsCount DESC")
     Page<Spot> findByAreaLikeAndCategoryAndPopular(@Param("area") String area, @Param("category") SpotCategory category, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.area LIKE %:area% ORDER BY s.createdAt DESC")
     Page<Spot> findByAreaLikeAndNewest(@Param("area") String area, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.area LIKE %:area% AND s.category = :category ORDER BY s.createdAt DESC")
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) AND s.area LIKE %:area% AND s.category = :category ORDER BY s.createdAt DESC")
     Page<Spot> findByAreaLikeAndCategoryAndNewest(@Param("area") String area, @Param("category") SpotCategory category, Pageable pageable);
 
-    // ---- Popular (viewsCount DESC) — area 없는 경우 ----
-    Page<Spot> findByIsActiveTrueOrderByViewsCountDesc(Pageable pageable);
+    // ---- Keyword search ----
 
-    Page<Spot> findByCategoryAndIsActiveTrueOrderByViewsCountDesc(SpotCategory category, Pageable pageable);
-
-    // ---- Newest (createdAt DESC) — area 없는 경우 ----
-    Page<Spot> findByIsActiveTrueOrderByCreatedAtDesc(Pageable pageable);
-
-    Page<Spot> findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(SpotCategory category, Pageable pageable);
-
-    // ---- Keyword 검색 (title OR crewNote LIKE) ----
-
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.viewsCount DESC")
     Page<Spot> findByKeywordAndPopular(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.createdAt DESC")
     Page<Spot> findByKeywordAndNewest(@Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.area LIKE %:area% " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.viewsCount DESC")
     Page<Spot> findByAreaLikeAndKeywordAndPopular(
         @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.area LIKE %:area% " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.createdAt DESC")
     Page<Spot> findByAreaLikeAndKeywordAndNewest(
         @Param("area") String area, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.category = :category " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.viewsCount DESC")
     Page<Spot> findByCategoryAndKeywordAndPopular(
         @Param("category") SpotCategory category, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.category = :category " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.createdAt DESC")
     Page<Spot> findByCategoryAndKeywordAndNewest(
         @Param("category") SpotCategory category, @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.area LIKE %:area% AND s.category = :category " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.viewsCount DESC")
@@ -93,7 +93,7 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
         @Param("area") String area, @Param("category") SpotCategory category,
         @Param("keyword") String keyword, Pageable pageable);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
            "AND s.area LIKE %:area% AND s.category = :category " +
            "AND (s.title LIKE %:keyword% OR s.crewNote LIKE %:keyword%) " +
            "ORDER BY s.createdAt DESC")
@@ -101,23 +101,36 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
         @Param("area") String area, @Param("category") SpotCategory category,
         @Param("keyword") String keyword, Pageable pageable);
 
-    // ---- Nearby ----
+    // ---- Nearby (public — APPROVED filter) ----
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true " +
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) " +
             "AND s.latitude BETWEEN :minLat AND :maxLat " +
             "AND s.longitude BETWEEN :minLng AND :maxLng")
     List<Spot> findNearby(
             @Param("minLat") double minLat, @Param("maxLat") double maxLat,
             @Param("minLng") double minLng, @Param("maxLng") double maxLng);
 
+    // ---- My Spots (all statuses for owner) ----
     Page<Spot> findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(String creatorId, Pageable pageable);
+
+    @Query("SELECT s FROM Spot s WHERE s.creatorId = :creatorId AND s.isActive = true AND s.status = :status ORDER BY s.createdAt DESC")
+    Page<Spot> findByCreatorIdAndStatusOrderByCreatedAtDesc(@Param("creatorId") String creatorId, @Param("status") SpotStatus status, Pageable pageable);
+
+    // ---- Admin: Pending review ----
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND s.status = :status ORDER BY s.createdAt ASC")
+    Page<Spot> findByStatusOrderByCreatedAtAsc(@Param("status") SpotStatus status, Pageable pageable);
+
+    long countByStatusAndIsActiveTrue(SpotStatus status);
 
     boolean existsBySlug(String slug);
 
     Optional<Spot> findByQrIdAndIsActiveTrue(String qrId);
 
-    @Query("SELECT s FROM Spot s WHERE s.isActive = true ORDER BY s.updatedAt DESC")
+    @Query("SELECT s FROM Spot s WHERE s.isActive = true AND (s.status = 'APPROVED' OR s.status IS NULL) ORDER BY s.updatedAt DESC")
     List<Spot> findAllActiveSlugs();
+
+    // ---- Unfiltered (admin/internal) ----
+    Page<Spot> findByIsActiveTrue(Pageable pageable);
 
     // ---- Analytics ----
 
@@ -133,6 +146,8 @@ public interface SpotRepository extends JpaRepository<Spot, UUID> {
     List<Object[]> countDailyCreatedSince(@Param("since") LocalDateTime since);
 
     long countByCreatorId(String creatorId);
+
+    long countByCreatorIdAndIsActiveTrue(String creatorId);
 
     // ---- BI Analytics ----
 

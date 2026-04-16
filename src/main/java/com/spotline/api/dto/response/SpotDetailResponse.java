@@ -4,6 +4,7 @@ import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
+import com.spotline.api.domain.enums.SpotStatus;
 import com.spotline.api.infrastructure.place.PlaceInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -62,6 +63,12 @@ public class SpotDetailResponse {
     /** Place API에서 가져온 매장 상세 (nullable — API 실패 시 null) */
     private PlaceInfo placeInfo;
 
+    // Approval Workflow
+    private SpotStatus status;
+    private String rejectionReason;
+    private LocalDateTime reviewedAt;
+    private String reviewedBy;
+
     /** 파트너 정보 (파트너 매장인 경우에만, 아니면 null) */
     private SpotPartnerInfo partner;
 
@@ -113,6 +120,10 @@ public class SpotDetailResponse {
                 .creatorType(spot.getCreatorType())
                 .creatorName(spot.getCreatorName())
                 .createdAt(spot.getCreatedAt())
+                .status(spot.getStatus())
+                .rejectionReason(spot.getRejectionReason())
+                .reviewedAt(spot.getReviewedAt())
+                .reviewedBy(spot.getReviewedBy())
                 .placeInfo(placeInfo)
                 .build();
     }

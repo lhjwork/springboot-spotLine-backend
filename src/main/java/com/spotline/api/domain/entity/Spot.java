@@ -2,6 +2,7 @@ package com.spotline.api.domain.entity;
 
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
+import com.spotline.api.domain.enums.SpotStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -21,7 +22,8 @@ import java.util.UUID;
         @Index(name = "idx_spot_active", columnList = "isActive"),
         @Index(name = "idx_spot_lat_lng", columnList = "latitude, longitude"),
         @Index(name = "idx_spot_sigungu", columnList = "sigungu"),
-        @Index(name = "idx_spot_sido", columnList = "sido")
+        @Index(name = "idx_spot_sido", columnList = "sido"),
+        @Index(name = "idx_spot_status", columnList = "status")
 })
 @Getter
 @Setter
@@ -129,6 +131,18 @@ public class Spot {
     private String creatorType; // "crew" or "user"
     private String creatorId;
     private String creatorName;
+
+    // ---- Approval Workflow ----
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private SpotStatus status = SpotStatus.APPROVED;
+
+    @Column(length = 500)
+    private String rejectionReason;
+
+    private LocalDateTime reviewedAt;
+
+    private String reviewedBy;
 
     @Builder.Default
     private Boolean isActive = true;

@@ -1,5 +1,6 @@
 package com.spotline.api.controller;
 
+import com.spotline.api.domain.entity.Blog;
 import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotLine;
 import com.spotline.api.domain.entity.User;
@@ -9,7 +10,9 @@ import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.domain.repository.SpotSaveRepository;
 import com.spotline.api.domain.repository.SpotVisitRepository;
+import com.spotline.api.domain.repository.BlogRepository;
 import com.spotline.api.domain.repository.UserRepository;
+import com.spotline.api.domain.enums.BlogStatus;
 import com.spotline.api.dto.request.AvatarUploadRequest;
 import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.*;
@@ -40,6 +43,7 @@ public class UserController {
     private final SpotRepository spotRepository;
     private final SpotLineRepository spotLineRepository;
     private final SpotVisitRepository spotVisitRepository;
+    private final BlogRepository blogRepository;
     private final UserProfileService userProfileService;
 
     @Operation(summary = "내 프로필 수정")
@@ -97,7 +101,14 @@ public class UserController {
     public UserProfileResponse getProfile(@PathVariable String userId) {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"));
-        return UserProfileResponse.from(user, 0, 0, 0);
+        int likedCount = (int) spotLikeRepository.countByUserId(userId);
+        int savedCount = (int) spotLineSaveRepository.countByUserId(userId);
+        int visitedCount = (int) spotVisitRepository.countByUserId(userId);
+        int spotsCount = (int) spotRepository.countByCreatorIdAndIsActiveTrue(userId);
+        int spotLinesCount = (int) spotLineRepository.countByCreatorIdAndIsActiveTrue(userId);
+        int blogsCount = (int) blogRepository.countByUserId(userId);
+        return UserProfileResponse.from(user, likedCount, savedCount, visitedCount,
+            spotsCount, spotLinesCount, blogsCount);
     }
 
     @Operation(summary = "사용자 좋아요 스팟")
@@ -128,6 +139,48 @@ public class UserController {
             @RequestParam(defaultValue = "12") int size) {
         return spotVisitRepository.findByUserIdOrderByCreatedAtDesc(userId, PageRequest.of(page, size))
             .map(sv -> SpotDetailResponse.from(sv.getSpot(), null));
+    }
+
+    @Operation(summary = "사용자 생성 SpotLine 목록 (공개)")
+    @GetMapping("/{userId}/spotlines-created")
+    public SimplePageResponse<SpotLinePreviewResponse> getUserSpotLines(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<SpotLine> spotLines = spotLineRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
+            userId, PageRequest.of(page, size));
+        return new SimplePageResponse<>(
+            spotLines.getContent().stream().map(SpotLinePreviewResponse::from).toList(),
+            spotLines.hasNext()
+        );
+    }
+
+    @Operation(summary = "사용자 생성 Spot 목록 (공개)")
+    @GetMapping("/{userId}/spots")
+    public SimplePageResponse<SpotDetailResponse> getUserSpots(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<Spot> spots = spotRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(
+            userId, PageRequest.of(page, size));
+        return new SimplePageResponse<>(
+            spots.getContent().stream().map(s -> SpotDetailResponse.from(s, null)).toList(),
+            spots.hasNext()
+        );
+    }
+
+    @Operation(summary = "사용자 작성 Blog 목록 (공개)")
+    @GetMapping("/{userId}/blogs")
+    public SimplePageResponse<BlogDetailResponse> getUserBlogs(
+            @PathVariable String userId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Page<Blog> blogs = blogRepository.findByUserIdAndStatusAndIsActiveTrueOrderByUpdatedAtDesc(
+            userId, BlogStatus.PUBLISHED, PageRequest.of(page, size));
+        return new SimplePageResponse<>(
+            blogs.getContent().stream().map(BlogDetailResponse::from).toList(),
+            blogs.hasNext()
+        );
     }
 
     @Operation(summary = "내 저장 목록")

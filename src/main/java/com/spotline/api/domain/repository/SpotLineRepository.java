@@ -128,6 +128,8 @@ public interface SpotLineRepository extends JpaRepository<SpotLine, UUID> {
 
     long countByCreatorId(String creatorId);
 
+    long countByCreatorIdAndIsActiveTrue(String creatorId);
+
     // ---- BI Analytics ----
 
     @Query("SELECT sl FROM SpotLine sl WHERE sl.isActive = true AND sl.createdAt BETWEEN :from AND :to ORDER BY sl.viewsCount DESC")

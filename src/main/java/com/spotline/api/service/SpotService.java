@@ -5,6 +5,7 @@ import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.domain.enums.SpotCategory;
+import com.spotline.api.domain.enums.SpotStatus;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
 import com.spotline.api.dto.request.MediaItemRequest;
@@ -29,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -103,10 +105,10 @@ public class SpotService {
         } else if (area != null) {
             return spotRepository.findByAreaLikeAndPopular(area, pageable);
         } else if (category != null) {
-            return spotRepository.findByCategoryAndIsActiveTrueOrderByViewsCountDesc(
+            return spotRepository.findApprovedByCategoryOrderByViewsCountDesc(
                     SpotCategory.valueOf(category.toUpperCase()), pageable);
         }
-        return spotRepository.findByIsActiveTrueOrderByViewsCountDesc(pageable);
+        return spotRepository.findApprovedOrderByViewsCountDesc(pageable);
     }
 
     private Page<Spot> listByNewest(String area, String category, Pageable pageable) {
@@ -116,10 +118,10 @@ public class SpotService {
         } else if (area != null) {
             return spotRepository.findByAreaLikeAndNewest(area, pageable);
         } else if (category != null) {
-            return spotRepository.findByCategoryAndIsActiveTrueOrderByCreatedAtDesc(
+            return spotRepository.findApprovedByCategoryOrderByCreatedAtDesc(
                     SpotCategory.valueOf(category.toUpperCase()), pageable);
         }
-        return spotRepository.findByIsActiveTrueOrderByCreatedAtDesc(pageable);
+        return spotRepository.findApprovedOrderByCreatedAtDesc(pageable);
     }
 
     private Page<Spot> listByPopularWithKeyword(String area, String category, String keyword, Pageable pageable) {
@@ -196,6 +198,7 @@ public class SpotService {
                 .creatorType(creatorType)
                 .creatorId(userId)
                 .creatorName(request.getCreatorName())
+                .status("user".equals(creatorType) ? SpotStatus.PENDING : SpotStatus.APPROVED)
                 .build();
 
         spot = spotRepository.save(spot);
@@ -218,6 +221,11 @@ public class SpotService {
                 .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
         verifyOwnership(spot.getCreatorId(), userId);
 
+        // User can only edit PENDING or REJECTED spots
+        if ("user".equals(spot.getCreatorType()) && spot.getStatus() == SpotStatus.APPROVED) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "승인된 Spot은 수정할 수 없습니다");
+        }
+
         if (request.getTitle() != null) spot.setTitle(request.getTitle());
         if (request.getDescription() != null) spot.setDescription(request.getDescription());
         if (request.getCategory() != null) spot.setCategory(request.getCategory());
@@ -239,6 +247,12 @@ public class SpotService {
         if (request.getMediaItems() != null) {
             spot.getMediaItems().clear();
             addMediaItems(spot, request.getMediaItems());
+        }
+
+        // Reset to PENDING on user edit (re-review required)
+        if ("user".equals(spot.getCreatorType())) {
+            spot.setStatus(SpotStatus.PENDING);
+            spot.setRejectionReason(null);
         }
 
         spotRepository.saveAndFlush(spot);
@@ -492,6 +506,68 @@ public class SpotService {
                 * Math.sin(dLng / 2) * Math.sin(dLng / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
         return R * c;
+    }
+
+    // ---- Approval Workflow ----
+
+    /**
+     * 내 Spot 목록 조회 (상태 필터 지원)
+     */
+    public Page<SpotDetailResponse> getMySpots(String userId, SpotStatus status, Pageable pageable) {
+        Page<Spot> spots;
+        if (status != null) {
+            spots = spotRepository.findByCreatorIdAndStatusOrderByCreatedAtDesc(userId, status, pageable);
+        } else {
+            spots = spotRepository.findByCreatorIdAndIsActiveTrueOrderByCreatedAtDesc(userId, pageable);
+        }
+        String s3BaseUrl = getS3BaseUrl();
+        return spots.map(spot -> SpotDetailResponse.from(spot, null, s3BaseUrl));
+    }
+
+    /**
+     * 검토 대기 Spot 목록 (어드민)
+     */
+    public Page<SpotDetailResponse> getPendingSpots(Pageable pageable) {
+        Page<Spot> spots = spotRepository.findByStatusOrderByCreatedAtAsc(SpotStatus.PENDING, pageable);
+        String s3BaseUrl = getS3BaseUrl();
+        return spots.map(spot -> SpotDetailResponse.from(spot, null, s3BaseUrl));
+    }
+
+    /**
+     * Spot 승인 (어드민)
+     */
+    @Transactional
+    public SpotDetailResponse approve(String slug, String adminId) {
+        Spot spot = spotRepository.findBySlugAndIsActiveTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
+        spot.setStatus(SpotStatus.APPROVED);
+        spot.setRejectionReason(null);
+        spot.setReviewedAt(LocalDateTime.now());
+        spot.setReviewedBy(adminId);
+        spotRepository.save(spot);
+        return SpotDetailResponse.from(spot, null, getS3BaseUrl());
+    }
+
+    /**
+     * Spot 반려 (어드민)
+     */
+    @Transactional
+    public SpotDetailResponse reject(String slug, String reason, String adminId) {
+        Spot spot = spotRepository.findBySlugAndIsActiveTrue(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Spot", slug));
+        spot.setStatus(SpotStatus.REJECTED);
+        spot.setRejectionReason(reason);
+        spot.setReviewedAt(LocalDateTime.now());
+        spot.setReviewedBy(adminId);
+        spotRepository.save(spot);
+        return SpotDetailResponse.from(spot, null, getS3BaseUrl());
+    }
+
+    /**
+     * 검토 대기 Spot 수 (뱃지용)
+     */
+    public long countPending() {
+        return spotRepository.countByStatusAndIsActiveTrue(SpotStatus.PENDING);
     }
 
     // ---- Private helpers ----
