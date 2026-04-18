@@ -56,16 +56,27 @@ public class UserSpotLineService {
         return userSpotLineRepository.findByUserIdOrderByCreatedAtDesc(userId, pageable);
     }
 
-    public UserSpotLine updateStatus(String userId, UUID mySpotLineId, String status) {
+    public UserSpotLine update(String userId, UUID mySpotLineId, String status, String scheduledDate) {
         UserSpotLine ur = userSpotLineRepository.findById(mySpotLineId)
             .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         if (!ur.getUserId().equals(userId)) {
             throw new ResponseStatusException(HttpStatus.FORBIDDEN);
         }
-        ur.setStatus(status);
-        if ("completed".equals(status)) {
-            ur.setCompletedAt(LocalDateTime.now());
+
+        if (scheduledDate != null) {
+            ur.setScheduledDate(scheduledDate);
         }
+
+        if (status != null) {
+            ur.setStatus(status);
+            if ("completed".equals(status)) {
+                ur.setCompletedAt(LocalDateTime.now());
+                SpotLine spotLine = ur.getSpotLine();
+                spotLine.setCompletionsCount(spotLine.getCompletionsCount() + 1);
+                spotLineRepository.save(spotLine);
+            }
+        }
+
         return userSpotLineRepository.save(ur);
     }
 

@@ -55,13 +55,17 @@ public class UserSpotLineController {
         );
     }
 
-    @Operation(summary = "내 SpotLine 상태 변경")
+    @Operation(summary = "내 SpotLine 업데이트")
     @PatchMapping("/users/me/spotlines/{mySpotLineId}")
-    public MySpotLineResponse updateStatus(
+    public MySpotLineResponse updateMySpotLine(
             @PathVariable UUID mySpotLineId,
             @RequestBody UpdateMySpotLineStatusRequest request) {
         return MySpotLineResponse.from(
-            userSpotLineService.updateStatus(authUtil.requireUserId(), mySpotLineId, request.getStatus()));
+            userSpotLineService.update(
+                authUtil.requireUserId(),
+                mySpotLineId,
+                request.getStatus(),
+                request.getScheduledDate()));
     }
 
     @Operation(summary = "내 SpotLine 삭제")
