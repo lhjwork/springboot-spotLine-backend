@@ -5,6 +5,7 @@ import com.spotline.api.domain.entity.Spot;
 import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.FeedSort;
 import com.spotline.api.domain.enums.SpotCategory;
+import com.spotline.api.domain.enums.NotificationType;
 import com.spotline.api.domain.enums.SpotStatus;
 import com.spotline.api.domain.repository.SpotRepository;
 import com.spotline.api.dto.request.CreateSpotRequest;
@@ -46,6 +47,7 @@ public class SpotService {
     private final PlaceApiService placeApiService;
     private final S3Service s3Service;
     private final PartnerService partnerService;
+    private final NotificationService notificationService;
     private final Slugify slugify = Slugify.builder().transliterator(true).build();
 
     /**
@@ -545,6 +547,13 @@ public class SpotService {
         spot.setReviewedAt(LocalDateTime.now());
         spot.setReviewedBy(adminId);
         spotRepository.save(spot);
+
+        if (spot.getCreatorId() != null) {
+            notificationService.create(adminId, spot.getCreatorId(),
+                NotificationType.SPOT_APPROVED, "SPOT",
+                spot.getId().toString(), spot.getSlug());
+        }
+
         return SpotDetailResponse.from(spot, null, getS3BaseUrl());
     }
 
@@ -560,6 +569,13 @@ public class SpotService {
         spot.setReviewedAt(LocalDateTime.now());
         spot.setReviewedBy(adminId);
         spotRepository.save(spot);
+
+        if (spot.getCreatorId() != null) {
+            notificationService.create(adminId, spot.getCreatorId(),
+                NotificationType.SPOT_REJECTED, "SPOT",
+                spot.getId().toString(), spot.getSlug());
+        }
+
         return SpotDetailResponse.from(spot, null, getS3BaseUrl());
     }
 

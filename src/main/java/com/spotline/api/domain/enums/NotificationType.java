@@ -6,5 +6,7 @@ public enum NotificationType {
     SPOTLINE_LIKE,
     BLOG_LIKE,
     COMMENT,
-    FORK
+    FORK,
+    SPOT_APPROVED,
+    SPOT_REJECTED
 }
