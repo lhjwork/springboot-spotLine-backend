@@ -32,6 +32,7 @@ public class SpotLineDetailResponse {
     private Integer replicationsCount;
     private Integer completionsCount;
     private Integer commentsCount;
+    private Integer sharesCount;
 
     // Creator
     private String creatorType;
@@ -86,6 +87,7 @@ public class SpotLineDetailResponse {
                 .replicationsCount(spotLine.getReplicationsCount())
                 .completionsCount(spotLine.getCompletionsCount())
                 .commentsCount(spotLine.getCommentsCount())
+                .sharesCount(spotLine.getSharesCount())
                 .creatorType(spotLine.getCreatorType())
                 .creatorName(spotLine.getCreatorName())
                 .parentSpotLineId(spotLine.getParentSpotLine() != null ? spotLine.getParentSpotLine().getId() : null)

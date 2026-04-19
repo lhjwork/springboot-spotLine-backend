@@ -75,6 +75,8 @@ public class SpotLine {
     private Integer completionsCount = 0;
     @Builder.Default
     private Integer commentsCount = 0;
+    @Builder.Default
+    private Integer sharesCount = 0;
 
     // ---- Creator ----
     @Column(nullable = false)

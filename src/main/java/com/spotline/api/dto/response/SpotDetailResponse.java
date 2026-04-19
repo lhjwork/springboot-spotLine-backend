@@ -53,6 +53,7 @@ public class SpotDetailResponse {
     private Integer savesCount;
     private Integer viewsCount;
     private Integer commentsCount;
+    private Integer sharesCount;
 
     // Creator
     private String creatorType;
@@ -117,6 +118,7 @@ public class SpotDetailResponse {
                 .savesCount(spot.getSavesCount())
                 .viewsCount(spot.getViewsCount())
                 .commentsCount(spot.getCommentsCount())
+                .sharesCount(spot.getSharesCount())
                 .creatorType(spot.getCreatorType())
                 .creatorName(spot.getCreatorName())
                 .createdAt(spot.getCreatedAt())
