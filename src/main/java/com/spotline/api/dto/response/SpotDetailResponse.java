@@ -5,6 +5,8 @@ import com.spotline.api.domain.entity.SpotMedia;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
 import com.spotline.api.domain.enums.SpotStatus;
+import com.spotline.api.domain.enums.TimeOfDay;
+import com.spotline.api.domain.enums.WeatherCondition;
 import com.spotline.api.infrastructure.place.PlaceInfo;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -70,6 +72,11 @@ public class SpotDetailResponse {
     private LocalDateTime reviewedAt;
     private String reviewedBy;
 
+    // Weather/Time context
+    private TimeOfDay bestTimeOfDay;
+    private WeatherCondition bestWeatherCondition;
+    private Boolean isIndoor;
+
     /** 파트너 정보 (파트너 매장인 경우에만, 아니면 null) */
     private SpotPartnerInfo partner;
 
@@ -126,6 +133,9 @@ public class SpotDetailResponse {
                 .rejectionReason(spot.getRejectionReason())
                 .reviewedAt(spot.getReviewedAt())
                 .reviewedBy(spot.getReviewedBy())
+                .bestTimeOfDay(spot.getBestTimeOfDay())
+                .bestWeatherCondition(spot.getBestWeatherCondition())
+                .isIndoor(spot.getIsIndoor())
                 .placeInfo(placeInfo)
                 .build();
     }

@@ -183,6 +183,9 @@ public class SpotService {
                 .category(request.getCategory())
                 .source(request.getSource())
                 .crewNote(request.getCrewNote())
+                .bestTimeOfDay(request.getBestTimeOfDay())
+                .bestWeatherCondition(request.getBestWeatherCondition())
+                .isIndoor(request.getIsIndoor())
                 .address(request.getAddress())
                 .latitude(request.getLatitude())
                 .longitude(request.getLongitude())
@@ -246,6 +249,9 @@ public class SpotService {
             spot.getMedia().clear();
             spot.getMedia().addAll(request.getMedia());
         }
+        if (request.getBestTimeOfDay() != null) spot.setBestTimeOfDay(request.getBestTimeOfDay());
+        if (request.getBestWeatherCondition() != null) spot.setBestWeatherCondition(request.getBestWeatherCondition());
+        if (request.getIsIndoor() != null) spot.setIsIndoor(request.getIsIndoor());
         if (request.getMediaItems() != null) {
             spot.getMediaItems().clear();
             addMediaItems(spot, request.getMediaItems());

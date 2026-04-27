@@ -3,6 +3,8 @@ package com.spotline.api.domain.entity;
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
 import com.spotline.api.domain.enums.SpotStatus;
+import com.spotline.api.domain.enums.TimeOfDay;
+import com.spotline.api.domain.enums.WeatherCondition;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -145,6 +147,18 @@ public class Spot {
     private LocalDateTime reviewedAt;
 
     private String reviewedBy;
+
+    // ---- Weather/Time Context ----
+    @Enumerated(EnumType.STRING)
+    @Column(name = "best_time_of_day")
+    private TimeOfDay bestTimeOfDay;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "best_weather_condition")
+    private WeatherCondition bestWeatherCondition;
+
+    @Column(name = "is_indoor")
+    private Boolean isIndoor;
 
     @Builder.Default
     private Boolean isActive = true;

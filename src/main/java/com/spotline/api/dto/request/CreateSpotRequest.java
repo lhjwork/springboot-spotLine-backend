@@ -2,6 +2,8 @@ package com.spotline.api.dto.request;
 
 import com.spotline.api.domain.enums.SpotCategory;
 import com.spotline.api.domain.enums.SpotSource;
+import com.spotline.api.domain.enums.TimeOfDay;
+import com.spotline.api.domain.enums.WeatherCondition;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -64,4 +66,13 @@ public class CreateSpotRequest {
 
     @Schema(description = "작성자명", example = "crew")
     private String creatorName;
+
+    @Schema(description = "추천 시간대", example = "AFTERNOON")
+    private TimeOfDay bestTimeOfDay;
+
+    @Schema(description = "추천 날씨", example = "SUNNY")
+    private WeatherCondition bestWeatherCondition;
+
+    @Schema(description = "실내 여부")
+    private Boolean isIndoor;
 }
