@@ -14,6 +14,7 @@ import com.spotline.api.domain.repository.BlogRepository;
 import com.spotline.api.domain.repository.UserRepository;
 import com.spotline.api.domain.enums.BlogStatus;
 import com.spotline.api.dto.request.AvatarUploadRequest;
+import com.spotline.api.dto.request.UpdateEmailRequest;
 import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.*;
 import com.spotline.api.security.AuthUtil;
@@ -51,6 +52,12 @@ public class UserController {
     public UserProfileResponse updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return userProfileService.updateProfile(
             authUtil.requireUserId(), authUtil.getCurrentEmail(), request);
+    }
+
+    @Operation(summary = "이메일 업데이트", description = "카카오 OAuth 사용자의 이메일을 설정합니다")
+    @PutMapping("/me/email")
+    public UserProfileResponse updateEmail(@Valid @RequestBody UpdateEmailRequest request) {
+        return userProfileService.updateEmail(authUtil.requireUserId(), request.getEmail());
     }
 
     @Operation(summary = "아바타 업로드")

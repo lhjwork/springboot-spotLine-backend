@@ -4,6 +4,7 @@ import com.spotline.api.domain.entity.User;
 import com.spotline.api.domain.repository.SpotLineSaveRepository;
 import com.spotline.api.domain.repository.SpotLikeRepository;
 import com.spotline.api.domain.repository.SpotVisitRepository;
+import com.spotline.api.domain.repository.UserRepository;
 import com.spotline.api.dto.request.UpdateProfileRequest;
 import com.spotline.api.dto.response.AvatarUploadResponse;
 import com.spotline.api.dto.response.UserProfileResponse;
@@ -21,6 +22,7 @@ import java.util.Set;
 public class UserProfileService {
 
     private final UserSyncService userSyncService;
+    private final UserRepository userRepository;
     private final S3Service s3Service;
     private final SpotLikeRepository spotLikeRepository;
     private final SpotLineSaveRepository spotLineSaveRepository;
@@ -95,6 +97,17 @@ public class UserProfileService {
             user.setAvatar(null);
         }
 
+        return buildProfileResponse(user);
+    }
+
+    @Transactional
+    public UserProfileResponse updateEmail(String userId, String email) {
+        if (userRepository.existsByEmailAndIdNot(email, userId)) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다");
+        }
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "유저를 찾을 수 없습니다"));
+        user.setEmail(email);
         return buildProfileResponse(user);
     }
 

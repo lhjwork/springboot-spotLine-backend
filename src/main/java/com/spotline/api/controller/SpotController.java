@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -110,7 +111,9 @@ public class SpotController {
             @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
         FeedSort feedSort = parseFeedSort(sort);
-        return ResponseEntity.ok(spotService.list(area, category, keyword, feedSort, pageable));
+        // Strip Pageable sort — @Query already defines ORDER BY; client 'sort' param is handled via FeedSort
+        Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        return ResponseEntity.ok(spotService.list(area, category, keyword, feedSort, unsorted));
     }
 
     @Operation(summary = "근처 스팟 조회")

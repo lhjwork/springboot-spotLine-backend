@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
@@ -45,7 +46,8 @@ public class SpotLineController {
             @RequestParam(required = false) String sort,
             @PageableDefault(size = 20) Pageable pageable) {
         FeedSort feedSort = parseFeedSort(sort);
-        return ResponseEntity.ok(spotLineService.getPopularPreviews(area, theme, keyword, feedSort, pageable));
+        Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+        return ResponseEntity.ok(spotLineService.getPopularPreviews(area, theme, keyword, feedSort, unsorted));
     }
 
     @Operation(summary = "전체 SpotLine slug 목록 (SSR/sitemap)")
